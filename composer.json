@@ -1,0 +1,19 @@
+{
+    "name": "olmec/olmec-notepress",
+    "description": "Just a WordPress plugin",
+    "type": "plugin",
+    "license": "gpl",
+    "autoload": {
+        "psr-4": {
+            "Olmec\\OlmecNotepress\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "rdelbem",
+            "email": "rodrigodelbem@gmail.com"
+        }
+    ],
+    "minimum-stability": "beta",
+    "require": {}
+}
