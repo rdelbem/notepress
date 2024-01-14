@@ -11,7 +11,7 @@
  */
 
 // Prevent direct file access
-if ( ! defined( 'ABSPATH' ) ) {
+if (!defined('ABSPATH')) {
     exit;
 }
 
@@ -19,7 +19,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 require_once __DIR__ . '/vendor/autoload.php';
 
 use Olmec\OlmecNotepress\CoreLoader;
+use Olmec\OlmecNotepress\Activation;
+
+register_activation_hook(__FILE__, fn() => Activation::run());
 
 if(!class_exists('CoreLoader')){
-    add_action('plugins_loaded', fn() => new CoreLoader());
+    add_action('init', fn() => new CoreLoader());
 }
