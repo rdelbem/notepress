@@ -6,7 +6,12 @@
     "autoload": {
         "psr-4": {
             "Olmec\\OlmecNotepress\\": "src/"
-        }
+        },
+        "files": [
+            "src/routes.php",
+            "src/defines.php",
+            "src/notepressPostypeAndTaxonomyDefinition.php"
+        ]
     },
     "authors": [
         {

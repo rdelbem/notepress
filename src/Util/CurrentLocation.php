@@ -11,7 +11,7 @@ if (!defined('ABSPATH')) {
  */
 trait CurrentLocation
 {
-    function CurrentLocationIs()
+    function currentLocationIs()
     {
         if (
             isset($_SERVER['HTTPS']) &&
@@ -24,5 +24,14 @@ trait CurrentLocation
             $protocol = 'http://';
         }
         return $protocol . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+    }
+
+    /**
+     * Use this to determine if the user is viewing a notepress domain
+     *
+     * @return boolean
+     */
+    function isCurrentLocationNotepressDomain(): bool {
+        return strpos($this->currentLocationIs(), '/notepress') !== false;
     }
 }

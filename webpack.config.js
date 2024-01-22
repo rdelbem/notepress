@@ -12,15 +12,15 @@ module.exports = (env) => {
     const pathToSave = "./assets/js/prod";
 
     return {
-        entry: path.resolve(__dirname, "./react-app/index.js"),
+        entry: path.resolve(__dirname, "./react-app/index.tsx"),
         module: {
             rules: [{
-                test: /\.m?js$/,
+                test: /\.(ts|tsx)$/,
                 exclude: /node_modules/,
                 use: {
                     loader: "babel-loader",
                     options: {
-                        presets: ["@babel/preset-env"],
+                        presets: ["@babel/preset-env", "@babel/preset-react", "@babel/preset-typescript"],
                     },
                 },
             },
@@ -31,7 +31,7 @@ module.exports = (env) => {
             ],
         },
         resolve: {
-            extensions: ["*", ".js", ".jsx"],
+            extensions: [".ts", ".tsx", ".js", ".jsx"],
         },
         output: {
             path: path.resolve(__dirname, pathToSave),
@@ -47,7 +47,7 @@ module.exports = (env) => {
             new BrowserSyncPlugin({
                 proxy: "localhost:8088",
                 port: 3000,
-                files: ["**/*.php"],
+                files: ["**/*.php", "**/*.ts", "**/*.js"],
                 ghostMode: {
                     clicks: false,
                     location: false,

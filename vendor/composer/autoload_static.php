@@ -6,6 +6,12 @@ namespace Composer\Autoload;
 
 class ComposerStaticInit243da389d1365e7ce99c54b6a132bca2
 {
+    public static $files = array (
+        '84e1810f053a2111eab825249c84e6b3' => __DIR__ . '/../..' . '/src/routes.php',
+        '9bae62310952e9ddfff2363e4f8f1458' => __DIR__ . '/../..' . '/src/defines.php',
+        'bd67d3d810defc05af93b306f1fbbd6c' => __DIR__ . '/../..' . '/src/notepressPostypeAndTaxonomyDefinition.php',
+    );
+
     public static $prefixLengthsPsr4 = array (
         'O' => 
         array (

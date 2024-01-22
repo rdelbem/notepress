@@ -9,6 +9,7 @@ if (!defined('ABSPATH')) {
 class CoreLoader
 {
     use \Olmec\OlmecNotepress\Util\CurrentLocation;
+    use \Olmec\OlmecNotepress\Util\DynamicScriptLoader;
 
     function __construct()
     {
@@ -18,6 +19,10 @@ class CoreLoader
         add_filter('page_template', [$this, 'themePageTemplate']);
         // adds support to react native routing system
         add_action('init', [$this, 'reactRoutingSupport']);
+        // adds an admin navbar link to the app
+        add_action('admin_bar_menu', [$this, 'adminNavBarLink'], 1000);
+        // load app
+        $this->loadReactApp();
     }
 
     /**
@@ -34,7 +39,7 @@ class CoreLoader
             exit;
         }
 
-        if (is_user_logged_in() && !is_login() && !is_admin() && !(strpos($this->CurrentLocationIs(), '/notepress') !== false)) {
+        if (is_user_logged_in() && !is_login() && !is_admin() && !$this->isCurrentLocationNotepressDomain()) {
             wp_redirect(home_url() . '/notepress');
             exit;
         }
@@ -47,12 +52,11 @@ class CoreLoader
      * @param string $template
      * @return string
      */
-    function themePageTemplate($template)
+    function themePageTemplate($template): string
     {
         global $post;
-        $expectTemplatePath = plugin_dir_path(__FILE__) . 'AppRootView/base-root-template.php';
-        if ($expectTemplatePath === get_post_meta($post->ID, '_wp_page_template', true)) {
-            $template = $expectTemplatePath;
+        if (OLMEC_NOTEPRESS_TEMPLATE_PATH === get_post_meta($post->ID, '_wp_page_template', true)) {
+            $template = OLMEC_NOTEPRESS_TEMPLATE_PATH;
         }
         return $template;
     }
@@ -64,7 +68,52 @@ class CoreLoader
      *
      * @return void
      */
-    function reactRoutingSupport() {
+    function reactRoutingSupport(): void 
+    {
         add_rewrite_rule('^notepress/(.+)?', 'index.php?pagename=notepress', 'top');
+    }
+
+    /**
+     * Adds a simple navbar link to the app main route
+     *
+     * @param \WP_Admin_Bar $wpNavBarNodes
+     * @return void
+     */
+    function adminNavBarLink(\WP_Admin_Bar $wpNavBarNodes): void {
+        $args = [
+            'id' => 'notepress-navbar-link',
+            'title' => esc_html('Go to Notepress'),
+            'href' => OLMEC_NOTEPRESS_APP_LINK,
+        ];
+
+        $wpNavBarNodes->add_node($args);
+
+        if(!is_admin()){
+            $nodesToRemove = [
+                'comments',
+                'new-content',
+                'view-site',
+                'edit',
+                'customize',
+                'updates',
+                'theme-dashboard',
+                'site-editor',
+                'notepress-navbar-link'
+            ];
+            foreach ($nodesToRemove as $node) {
+                $wpNavBarNodes->remove_node($node);
+            }
+        }
+    }
+
+    function loadReactApp(): void {
+        $this->loadScriptDynamically(
+            'app',
+            OLMEC_NOTEPRESS_REACT_APP_URL,
+            ['wp-element'],
+            time(), // TODO: use env vars
+            false,
+            $this->isCurrentLocationNotepressDomain()
+        );
     }
 }
