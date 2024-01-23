@@ -51,7 +51,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack --mode=production --env production",
-    "start": "webpack --watch --mode=production --env production"
+    "start": "webpack --watch --mode=production --env production",
+    "convert:types": "node convertToTypescript.js",
+    "generate:types": "composer generate:contracts && npm run convert:types"
   },
   "author": "",
   "license": "ISC"

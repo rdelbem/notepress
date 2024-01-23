@@ -19,6 +19,9 @@
             "email": "rodrigodelbem@gmail.com"
         }
     ],
+    "scripts": {
+        "generate:contracts": "php src/Types/generate-contracts.php"
+    },
     "minimum-stability": "beta",
     "require": {}
 }

@@ -2,17 +2,22 @@
 
 namespace Olmec\OlmecNotepress\Api;
 
+use Olmec\OlmecNotepress\Types\Note;
+use Olmec\OlmecNotepress\Types\Author;
+
 if(!defined('ABSPATH')){
     exit;
 }
 
 final class Notes
 {
-    function getAll() {
+    const POST_PER_PAGE = 30;
+    function getAll(int $pageNumber = 1) {
         $args = array(
             'post_type' => 'notes',
             'post_status' => 'publish',
-            'posts_per_page' => -1,
+            'paged' => $pageNumber,
+            'posts_per_page' => self::POST_PER_PAGE,
         );
         
         $notesQuery = new \WP_Query($args);
@@ -21,17 +26,20 @@ final class Notes
         if ($notesQuery->have_posts()) {
             while ($notesQuery->have_posts()) {
                 $notesQuery->the_post();
-                $notesArray[] = [
-                    'title' => get_the_title(), 
-                    'id' => get_the_ID(), 
-                    'author' => [
-                        'display_name' => get_the_author_meta('display_name'),
-                        'id' => get_the_author_meta('id'),
-                        ] ,
-                    'content' => get_the_content(),
-                    'created_at' => get_the_date('c'),
-                    'updated_at' => get_the_modified_date('c')
-                    ];
+
+                $author = new Author(
+                    get_the_author_meta('display_name'),
+                    get_the_author_meta('id')
+                );
+
+                $notesArray[] = new Note(
+                    get_the_title(), 
+                    get_the_ID(), 
+                    $author,
+                    get_the_content(),
+                    get_the_date('c'),
+                    get_the_modified_date('c')
+                );
             }
 
             wp_send_json($notesArray);
@@ -82,7 +90,7 @@ final class Notes
         $post = get_post($note['id'], ARRAY_A);
         $response = null;
         if($post && $post->post_type === 'notes') {
-            $response = wp_update_post([...$post, ...json_decode($note->get_body())], true);
+            $response = wp_update_post([...$post, ...json_decode($note->get_body(), true)], true);
         }
         if($response instanceof \WP_Error || $response === null || $response === 0){
             $errorMessage = 'Update failed, unknown error';
@@ -105,6 +113,46 @@ final class Notes
         }
 
         wp_send_json('It was not possible to delete note ' . $noteId);
+        exit;
+    }
+
+    function search(string $keyWord, int $pageNumber = 1) {
+        $args = [
+            'post_type' => 'notes',
+            'post_status' => 'publish',
+            's' => $keyWord,
+            'posts_per_page' => self::POST_PER_PAGE,
+            'paged' => $pageNumber,
+        ];
+    
+        $notesQuery = new \WP_Query($args);
+        $notesArray = [];
+    
+        if (!$notesQuery->have_posts()) {
+            wp_send_json('No notes found using: ' . $keyWord);
+            wp_reset_postdata();
+            exit;
+        }
+
+        while ($notesQuery->have_posts()) {
+            $notesQuery->the_post();
+            $author = new Author(
+                get_the_author_meta('display_name'),
+                get_the_author_meta('id')
+            );
+
+            $notesArray[] = new Note(
+                get_the_title(), 
+                get_the_ID(), 
+                $author,
+                get_the_content(),
+                get_the_date('c'),
+                get_the_modified_date('c')
+            );
+        }
+
+        wp_send_json($notesArray);
+        wp_reset_postdata();
         exit;
     }
 }
