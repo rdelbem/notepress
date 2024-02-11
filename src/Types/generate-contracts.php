@@ -1,9 +1,11 @@
 <?php
 
+echo "Iniating types generation.\n";
 function getSimpleClassName($phpType) {
     $path = explode('\\', $phpType);
     return array_pop($path);
 }
+
 function mapPhpTypeToTypeScript($phpType, $isClass = false) {
     if ($isClass) {
         return $phpType;
@@ -36,7 +38,7 @@ foreach ($files as $file) {
             continue;
         }
         
-        $reflectionClass = new ReflectionClass($className);
+        $reflectionClass = new \ReflectionClass($className);
         $properties = $reflectionClass->getProperties();
         $schema = [];
 

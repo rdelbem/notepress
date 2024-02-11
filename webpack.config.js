@@ -47,7 +47,7 @@ module.exports = (env) => {
             new BrowserSyncPlugin({
                 proxy: "localhost:8088",
                 port: 3000,
-                files: ["**/*.php", "**/*.ts", "**/*.js"],
+                files: ["**/*.php", "**/*.ts",  "**/*.tsx", "**/*.js"],
                 ghostMode: {
                     clicks: false,
                     location: false,

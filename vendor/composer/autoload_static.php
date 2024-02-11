@@ -10,6 +10,7 @@ class ComposerStaticInit243da389d1365e7ce99c54b6a132bca2
         '84e1810f053a2111eab825249c84e6b3' => __DIR__ . '/../..' . '/src/routes.php',
         '9bae62310952e9ddfff2363e4f8f1458' => __DIR__ . '/../..' . '/src/defines.php',
         'bd67d3d810defc05af93b306f1fbbd6c' => __DIR__ . '/../..' . '/src/notepressPostypeAndTaxonomyDefinition.php',
+        'bf27e6950eb82205f4d6b7ca3a594a97' => __DIR__ . '/../..' . '/src/Util/functions.php',
     );
 
     public static $prefixLengthsPsr4 = array (

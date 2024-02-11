@@ -1,7 +1,12 @@
 {
     "Author": {
+        "id": "number",
         "display_name": "string",
-        "id": "number"
+        "avatar": "string"
+    },
+    "CreateNoteInput": {
+        "title": "string",
+        "workspaces": "string"
     },
     "Note": {
         "title": "string",
@@ -10,5 +15,14 @@
         "content": "string",
         "created_at": "string",
         "updated_at": "string"
+    },
+    "User": {
+        "id": "number",
+        "display_name": "string",
+        "avatar": "string"
+    },
+    "Workspace": {
+        "id": "number",
+        "name": "string"
     }
 }

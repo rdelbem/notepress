@@ -26,9 +26,9 @@ fs.readFile('src/Types/Schemas.json', 'utf8', (err, data) => {
 
     fs.writeFile('react-app/types/schemas.ts', typescriptOutput, (err) => {
         if (err) {
-            console.error("Error when trying to write types: ", err);
-        } else {
-            console.log("TypeScript generated successfully.");
+            return console.error("Error when trying to write types: ", err);
         }
+            return console.log("TypeScript generated successfully.");
+        
     });
 });

@@ -15,9 +15,11 @@ if (!defined('ABSPATH')) {
 
 use Olmec\OlmecNotepress\Api\Notes;
 use Olmec\OlmecNotepress\Api\Route;
+use Olmec\OlmecNotepress\Api\Workspaces;
 
 $route = new Route();
 $notes = new Notes();
+$workspaces = new Workspaces();
 
 // uncomment this line and visit yoursiteurl/wp-json/API_NAME_SPACE/test
 // $route->create('GET', '/test', fn() => wp_send_json('hello world'), true);
@@ -26,11 +28,17 @@ $notes = new Notes();
 
 // notes routes
 $route->create('GET', '/notes', fn(\WP_REST_Request $request) => $notes->getAll($request->get_param('page') ?? 1));
-$route->create('GET', '/notes/:id', fn(\WP_REST_Request  $params) => $notes->getById((int) $params['id']));
+$route->create('GET', '/notes/:id', fn(\WP_REST_Request $params) => $notes->getById((int) $params['id']));
 $route->create('POST', '/notes', fn(\WP_REST_Request $params) => $notes->create($params));
 $route->create('PATCH', '/notes/:id', fn(\WP_REST_Request $params) => $notes->update($params));
-$route->create('DELETE', '/notes/:id', fn(\WP_REST_Request  $params) => $notes->delete((int) $params['id']));
-$route->create('GET', '/notes/search', fn(\WP_REST_Request $request) => $notes->search($request->get_param('query'), $request->get_param('page') ?? 1));
+$route->create('DELETE', '/notes/:id', fn(\WP_REST_Request $params) => $notes->delete((int) $params->get_param('id')));
+$route->create('GET', '/notes/search', fn(\WP_REST_Request $request) => $notes->search($request->get_param('query'), (int) $request->get_param('page') ?? 1));
+$route->create('GET', '/notes/workspace', fn(\WP_REST_Request $params) => $notes->getNotesByWorkspace($params->get_param('term'), (int) $params->get_param('page') ?? 1));
 
-// taxonomy routes
-
+// workspaces routes
+$route->create('GET', '/workspaces', fn(\WP_REST_Request $request) => $workspaces->getAll($request->get_param('page') ?? 1));
+$route->create('GET', '/workspaces/:id', fn(\WP_REST_Request $params) => $workspaces->getById((int) $params['id']));
+$route->create('POST', '/workspaces', fn(\WP_REST_Request $params) => $workspaces->create($params));
+$route->create('PATCH', '/workspaces/:id', fn(\WP_REST_Request $params) => $workspaces->update($params));
+$route->create('DELETE', '/workspaces/:id', fn(\WP_REST_Request $params) => $workspaces->delete((int) $params['id']));
+$route->create('GET', '/workspaces/search', fn(\WP_REST_Request $request) => $workspaces->search($request->get_param('query'), $request->get_param('page') ?? 1));

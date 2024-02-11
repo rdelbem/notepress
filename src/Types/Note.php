@@ -4,7 +4,7 @@ namespace Olmec\OlmecNotepress\Types;
 
 use Olmec\OlmecNotepress\Types\Author;
 
-class Note
+final class Note
 {
     public string $title;
     public int $id;

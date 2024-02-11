@@ -24,7 +24,7 @@ final class Route
     {
         $headers = $request->get_headers();
         $nonce = $headers['x_wp_nonce'][0] ?? null;
-        $isValidNonce = $nonce ? wp_verify_nonce($nonce) : false;
+        $isValidNonce = $nonce ? wp_verify_nonce($nonce, 'wp_rest') : false;
 
         if ($isValidNonce) {
             return current_user_can('publish_posts');
@@ -70,7 +70,6 @@ final class Route
      */
     public function create(string $httpVerb, string $route, callable $callback, bool $openApi = false)
     {
-
         $routeHasParams = str_contains($route, ':');
         $routeArray = $routeHasParams && (bool) explode(':', $route) ? explode(':', $route) : [];
 

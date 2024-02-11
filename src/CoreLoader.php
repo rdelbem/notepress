@@ -16,13 +16,15 @@ class CoreLoader
         // takes control over traditional wp routes
         $this->takeOverControl();
         // register our base template file for our custom page created on activation
-        add_filter('page_template', [$this, 'themePageTemplate']);
+        $this->themePageTemplate();
         // adds support to react native routing system
-        add_action('init', [$this, 'reactRoutingSupport']);
+        $this->reactRoutingSupport();
         // adds an admin navbar link to the app
-        add_action('admin_bar_menu', [$this, 'adminNavBarLink'], 1000);
+        $this->adminNavBarLink();
         // load app
         $this->loadReactApp();
+        // remove admin nav bar from not admin routes
+        $this->removeAdminNavbar();
     }
 
     /**
@@ -48,17 +50,18 @@ class CoreLoader
     /**
      * Associates the visited route 
      * to the correct temaplate
-     *
-     * @param string $template
-     * @return string
+     * 
+     * @return void
      */
-    function themePageTemplate($template): string
+    function themePageTemplate(): void
     {
-        global $post;
-        if (OLMEC_NOTEPRESS_TEMPLATE_PATH === get_post_meta($post->ID, '_wp_page_template', true)) {
-            $template = OLMEC_NOTEPRESS_TEMPLATE_PATH;
-        }
-        return $template;
+        add_filter('page_template', function (string $template): string {
+            global $post;
+            if (OLMEC_NOTEPRESS_TEMPLATE_PATH === get_post_meta($post->ID, '_wp_page_template', true)) {
+                $template = OLMEC_NOTEPRESS_TEMPLATE_PATH;
+            }
+            return $template;
+        });
     }
 
     /**
@@ -68,45 +71,65 @@ class CoreLoader
      *
      * @return void
      */
-    function reactRoutingSupport(): void 
+    function reactRoutingSupport(): void
     {
-        add_rewrite_rule('^notepress/(.+)?', 'index.php?pagename=notepress', 'top');
+        // Forces WP to understand sub-routes
+        add_action('parse_request', function($wp) {
+            if (preg_match('#^notepress/(.+)#', $wp->request)) {
+                status_header(200);
+                include(get_index_template());
+                exit;
+            }
+        });
+
+        add_action(
+            'init',
+            fn() => add_rewrite_rule(
+                '^notepress/(.+)?',
+                'index.php?pagename=notepress',
+                'top'
+            )
+        );
     }
 
     /**
      * Adds a simple navbar link to the app main route
-     *
-     * @param \WP_Admin_Bar $wpNavBarNodes
+     * 
      * @return void
      */
-    function adminNavBarLink(\WP_Admin_Bar $wpNavBarNodes): void {
-        $args = [
-            'id' => 'notepress-navbar-link',
-            'title' => esc_html('Go to Notepress'),
-            'href' => OLMEC_NOTEPRESS_APP_LINK,
-        ];
-
-        $wpNavBarNodes->add_node($args);
-
-        if(!is_admin()){
-            $nodesToRemove = [
-                'comments',
-                'new-content',
-                'view-site',
-                'edit',
-                'customize',
-                'updates',
-                'theme-dashboard',
-                'site-editor',
-                'notepress-navbar-link'
+    function adminNavBarLink(): void
+    {
+        add_action('admin_bar_menu', function (\WP_Admin_Bar $wpNavBarNodes) {
+            $args = [
+                'id' => 'notepress-navbar-link',
+                'title' => esc_html('Go to Notepress'),
+                'href' => OLMEC_NOTEPRESS_APP_LINK,
             ];
-            foreach ($nodesToRemove as $node) {
-                $wpNavBarNodes->remove_node($node);
+
+            $wpNavBarNodes->add_node($args);
+
+            if (!is_admin()) {
+                $nodesToRemove = [
+                    'comments',
+                    'new-content',
+                    'view-site',
+                    'edit',
+                    'customize',
+                    'updates',
+                    'theme-dashboard',
+                    'site-editor',
+                    'notepress-navbar-link'
+                ];
+                foreach ($nodesToRemove as $node) {
+                    $wpNavBarNodes->remove_node($node);
+                }
             }
-        }
+        }, 1000);
+
     }
 
-    function loadReactApp(): void {
+    function loadReactApp(): void
+    {
         $this->loadScriptDynamically(
             'app',
             OLMEC_NOTEPRESS_REACT_APP_URL,
@@ -115,5 +138,10 @@ class CoreLoader
             false,
             $this->isCurrentLocationNotepressDomain()
         );
+    }
+
+    function removeAdminNavbar()
+    {
+        add_filter('show_admin_bar', fn() => is_admin());
     }
 }

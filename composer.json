@@ -10,7 +10,8 @@
         "files": [
             "src/routes.php",
             "src/defines.php",
-            "src/notepressPostypeAndTaxonomyDefinition.php"
+            "src/notepressPostypeAndTaxonomyDefinition.php",
+            "src/Util/functions.php"
         ]
     },
     "authors": [

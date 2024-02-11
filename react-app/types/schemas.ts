@@ -1,6 +1,12 @@
 export type Author = {
-    display_name: string,
     id: number,
+    display_name: string,
+    avatar: string,
+};
+
+export type CreateNoteInput = {
+    title: string,
+    workspaces?: string,
 };
 
 export type Note = {
@@ -10,5 +16,16 @@ export type Note = {
     content: string,
     created_at: string,
     updated_at: string,
+};
+
+export type User = {
+    id: number,
+    display_name: string,
+    avatar: string,
+};
+
+export type Workspace = {
+    id: number,
+    name: string,
 };
 
