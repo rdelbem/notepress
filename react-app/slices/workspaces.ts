@@ -1,24 +1,62 @@
-import { createAsyncThunk } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { Workspace } from "../types/schemas";
 import { api } from "./fetch";
-import { State, createSliceWrapper } from "./createSliceWrapper";
+import { State } from "./createSliceWrapper";
+import {
+  AnyAsyncThunk,
+  RejectedWithValueActionFromAsyncThunk,
+} from "@reduxjs/toolkit/dist/matchers";
 
-export const fetchWorkspaceData = createAsyncThunk<Workspace[]>(
-  "api/fetchWorkspaceData",
-  async () => {
-    const { data } = await api.get("workspaces");
-    return data;
+type WorkspacesResponse =
+  | {
+      pageNumber: number,
+      total: number,
+      workspaces?: Workspace[],
+    }
+  | undefined;
+
+export const fetchWorkspaceData = createAsyncThunk<WorkspacesResponse, number, {rejectValue: string;}>(
+  "fetchWorkspaceData",
+  async (
+    pageNumber: number,
+    { rejectWithValue }
+  ): Promise<
+    WorkspacesResponse | RejectedWithValueActionFromAsyncThunk<AnyAsyncThunk>
+  > => {
+    try {
+      const page = pageNumber === 0 ? 1 : pageNumber
+      const { data } = await api.get<WorkspacesResponse>(`workspaces?page=${page}`);
+      return data;
+    } catch (error) {
+      return rejectWithValue("An error occurred");
+    }
   }
 );
 
-const initialState: State<Workspace[]> = {
+const initialState: State<WorkspacesResponse> = {
   data: undefined,
   status: "idle",
   error: undefined,
 };
 
-export default createSliceWrapper(
-  "workspaces",
-  fetchWorkspaceData,
-  initialState
-).reducer;
+const slice = createSlice({
+  name: "workspaces",
+  initialState,
+  reducers: {},
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchWorkspaceData.pending, (state) => {
+        state.status = "loading";
+      })
+      .addCase(fetchWorkspaceData.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        state.data = action.payload;
+      })
+      .addCase(fetchWorkspaceData.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.error.message ? action.error.message : "";
+      });
+  },
+});
+
+export default slice.reducer;

@@ -1,55 +1,58 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { api, response } from "../../slices/fetch";
 import { Note } from "../../types";
 import LoadingBar from "react-top-loading-bar";
 import { magenta } from "../../colors";
 import { NoteCard } from "../NoteCard/NoteCard";
 import styled from "styled-components";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../../store";
+import { fetchNotesByCategory, removeNote } from "../../slices/notes";
+import ReactPaginate from "react-paginate";
 
-const gapPadding = '1.5rem';
+const gapPadding = "1.5rem";
 
 const Container = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: ${gapPadding};
   padding: ${gapPadding};
-`
+`;
 
 export const NotesListView = () => {
   const { term } = useParams();
-  const [notes, setNotes] = useState<response | null>(null);
+  const dispatch = useDispatch<AppDispatch>();
   const [progress, setProgress] = useState(0);
+  const {
+    data,
+    error,
+    status,
+  } = useSelector((state: RootState) => state.notes);
 
   useEffect(() => {
-    const fetchNotes = async () => {
-      setProgress(30);
-      try {
-        const response = await api.get(term ? `notes/workspace?term=${term}` : 'notes');
-        setNotes(response);
-        setProgress(100);
-      } catch (error) {
-        setProgress(100);
-        console.error("Erro ao buscar notas:", error);
-      } finally {
-        setProgress(100);
-      }
-    };
-
-    fetchNotes();
-  }, [term]);
-
-  const removeNote = (noteId: number) => {
-    if(notes?.data && Array.isArray(notes.data)){
-      const updatedNotesState: Note[] = notes.data.filter((note: Note) => note.id !== noteId)
-      setNotes((prev)=>{
-        return {
-          ...prev,
-          data: updatedNotesState
-        }
-      })
+    setProgress(30);
+    if (term) {
+      dispatch(fetchNotesByCategory({category: term, pageNumber: 0}));
+    } else {
+      dispatch(fetchNotesByCategory({category: 'all', pageNumber: 0}));
     }
-  }
+    setProgress(100);
+  }, [term, dispatch]);
+
+  const handleRemoveNote = (noteId: number) => {
+    if (data?.notes && Array.isArray(data.notes)) {
+      dispatch(removeNote(noteId));
+    }
+  };
+
+  const handlePageClick = ({selected}: {selected: number}) => {
+    // WordPress starts its pagination count at 1 😔
+    if(term) {
+      dispatch(fetchNotesByCategory({category: term, pageNumber: selected += 1}));
+    }else{
+      dispatch(fetchNotesByCategory({category: 'all', pageNumber: selected += 1}));
+    }
+  };
 
   return (
     <>
@@ -59,14 +62,44 @@ export const NotesListView = () => {
         onLoaderFinished={() => setProgress(0)}
       />
       <Container>
-        {notes && Array.isArray(notes.data)
-          ? notes.data.map((note: Note) => (
-              <NoteCard {...note} key={note.id} removeNote={removeNote} />
-            ))
-          : (
-            <p>No notes found for this workspace.</p>
-          )}
+        {data?.notes && Array.isArray(data.notes) ? (
+          data.notes.map((note: Note) => {
+            const noteWorkspaces: string | string[] | undefined =
+              note.workspaces.split(",")
+                ? note.workspaces.split(",")
+                : note.workspaces === ""
+                ? note.workspaces
+                : undefined;
+            if (Array.isArray(noteWorkspaces) && term) {
+              return noteWorkspaces.includes(term) ? (
+                <NoteCard
+                  {...note}
+                  key={note.id}
+                  removeNote={handleRemoveNote}
+                />
+              ) : (
+                <p>No notes found for this workspace.</p>
+              );
+            }
+            return (
+              <NoteCard {...note} key={note.id} removeNote={handleRemoveNote} />
+            );
+          })
+        ) : (
+          <p>No notes found for this workspace.</p>
+        )}
       </Container>
+      {data?.total && data.total > 10 && (
+        <ReactPaginate
+          breakLabel="..."
+          nextLabel=">"
+          previousLabel="<"
+          onPageChange={handlePageClick}
+          pageRangeDisplayed={4}
+          pageCount={data?.total / 10}
+          renderOnZeroPageCount={null}
+        />
+      )}
     </>
   );
 };

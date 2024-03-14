@@ -1,10 +1,12 @@
 
 import { configureStore } from '@reduxjs/toolkit';
 import workspaces from './slices/workspaces'
+import notes from './slices/notes';
 
 export const store = configureStore({
   reducer: {
     workspaces,
+    notes
   },
 });
 

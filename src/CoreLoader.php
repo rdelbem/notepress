@@ -25,6 +25,10 @@ class CoreLoader
         $this->loadReactApp();
         // remove admin nav bar from not admin routes
         $this->removeAdminNavbar();
+        // total workspace counter
+        $this->countWorkspaces();
+        // total notes
+        $this->countNotes();
     }
 
     /**
@@ -49,7 +53,7 @@ class CoreLoader
 
     /**
      * Associates the visited route 
-     * to the correct temaplate
+     * to the correct template
      * 
      * @return void
      */
@@ -67,7 +71,7 @@ class CoreLoader
     /**
      * This will make possible to use
      * react routing system without
-     * causing navigation issues
+     * colliding with WordPress routing
      *
      * @return void
      */
@@ -140,8 +144,42 @@ class CoreLoader
         );
     }
 
-    function removeAdminNavbar()
+    function removeAdminNavbar(): void
     {
-        add_filter('show_admin_bar', fn() => is_admin());
+        add_filter('show_admin_bar', fn () => is_admin());
+    }
+
+    function countWorkspaces(): void {
+        $update = fn () => update_option('total_workspaces', get_terms([
+            'taxonomy' => 'workspaces',
+            'hide_empty' => false,
+            'fields' => 'count',
+        ]));
+
+        add_action('created_workspaces', $update);
+        add_action('delete_workspaces', $update);
+    }
+
+    function countNotes() {
+        add_action('save_post_notes', function($postId, $post, $update){
+            if ($post->post_type !== 'notes') {
+                return;
+            }
+        
+            $totalNotes = (int) get_option('total_notes', 0);
+            if (!$update) {
+                update_option('total_notes', $totalNotes + 1);
+            }
+        }, 10, 3);
+
+        add_action('before_delete_post', function($postId){
+            $postType = get_post_type($postId);
+            if ($postType !== 'notes') {
+                return;
+            }
+        
+            $totalNotes = (int) get_option('total_notes', 0);
+            update_option('total_notes', max(0, $totalNotes - 1));
+        }, 10, 1);
     }
 }

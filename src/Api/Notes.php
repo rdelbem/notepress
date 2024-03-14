@@ -5,6 +5,8 @@ namespace Olmec\OlmecNotepress\Api;
 use Olmec\OlmecNotepress\Types\Note;
 use Olmec\OlmecNotepress\Types\Author;
 use function Olmec\OlmecNotepress\Util\excerptFromText;
+use function Olmec\OlmecNotepress\Util\getNotesCount;
+use function Olmec\OlmecNotepress\Util\setNotesCount;
 
 if(!defined('ABSPATH')){
     exit;
@@ -12,11 +14,11 @@ if(!defined('ABSPATH')){
 
 final class Notes
 {
-    const POST_PER_PAGE = 30;
+    const NOTES_PER_PAGE = 10;
     const ALL_NOTES_CACHE_KEY = 'notes_get_all';
 
-    function getAll(int $pageNumber = 1) {
-        $cacheKey = self::ALL_NOTES_CACHE_KEY;
+    public function getAll(int $pageNumber = 1) {
+        $cacheKey = self::ALL_NOTES_CACHE_KEY . '_' . $pageNumber;
         $cachedNotes = get_transient($cacheKey);
 
         if((bool) $cachedNotes){
@@ -28,7 +30,7 @@ final class Notes
             'post_type' => 'notes',
             'post_status' => 'publish',
             'paged' => $pageNumber,
-            'posts_per_page' => self::POST_PER_PAGE,
+            'posts_per_page' => self::NOTES_PER_PAGE,
         ];
         
         $notesQuery = new \WP_Query($args);
@@ -36,6 +38,7 @@ final class Notes
         
         if ($notesQuery->have_posts()) {
             while ($notesQuery->have_posts()) {
+                global $post;
                 $notesQuery->the_post();
 
                 $authorAvatar = get_avatar_url(get_the_author_meta('ID'), ['size' => 450]);
@@ -45,19 +48,34 @@ final class Notes
                     $authorAvatar ? $authorAvatar : null
                 );
 
+                $workspacesAsWpTerms = get_the_terms($post, 'workspaces');
+                $workspacesArray = [];
+                if(!is_wp_error($workspacesAsWpTerms) && is_array($workspacesAsWpTerms)){
+                    foreach ($workspacesAsWpTerms as $workspace) {
+                        $workspacesArray[] = $workspace->name;
+                    }
+                }
+
                 $notesArray[] = new Note(
                     get_the_title(), 
                     get_the_ID(), 
                     $author,
                     excerptFromText(get_the_content()), // Here it is not necessary to send the full text
+                    is_array($workspacesArray) ? implode(',', $workspacesArray) : '',
                     get_the_date('c'),
                     get_the_modified_date('c')
                 );
             }
 
-            set_transient($cacheKey, $notesArray, 60);
+            $createResponse = [
+                'total' => getNotesCount(),
+                'pageNumber' => $pageNumber,
+                'notes' => $notesArray 
+            ];
 
-            wp_send_json($notesArray);
+            set_transient($cacheKey, $createResponse, 60);
+
+            wp_send_json($createResponse);
             wp_reset_postdata();
             exit;
         }
@@ -66,40 +84,45 @@ final class Notes
         exit;
     }
 
-    function getById(int $noteId) {
+    public function getById(int $noteId) {
         // get post is slightly more performant than WP_Query
         $note = get_post($noteId);
 
+        $workspacesAsWpTerms = get_the_terms($note, 'workspaces');
+        $workspacesArray = [];
+        if(!is_wp_error($workspacesAsWpTerms) && is_array($workspacesAsWpTerms)){
+            foreach ($workspacesAsWpTerms as $workspace) {
+                $workspacesArray[] = $workspace->name;
+            }
+        }
         if ($note && $note->post_type == 'notes') {
-            wp_send_json([
-                'title' => $note->post_title, 
-                'id' => $note->ID, 
-                'author' => [
-                    'display_name' => get_the_author_meta('display_name', $note->post_author),
-                    'id' => $note->post_author,
-                    ] ,
-                'content' => $note->post_content,
-                'created_at' => date('c', strtotime($note->post_date)), // to ISO 8601
-                'updated_at' => date('c', strtotime($note->post_modified)) // to ISO 8601
-                ]);
+            wp_send_json(new Note(
+                    $note->post_title, 
+                    (int) $note->ID, 
+                    new Author(
+                        (int) get_the_author_meta('display_name', $note->post_author),
+                        $note->post_author
+                    ),
+                    $note->post_content,
+                    is_array($workspacesArray) ? implode(',', $workspacesArray) : '',
+                    date('c', strtotime($note->post_date)), // to ISO 8601
+                    date('c', strtotime($note->post_modified)) // to ISO 8601
+                ));
             exit;
         }
         wp_send_json('Note ' . $noteId . ' not found');
         exit;
     }
 
-    function create(\WP_REST_Request $note) {
+    public function create(\WP_REST_Request $note) {
         $noteWorkspaces = null;
         $noteTitle = $note->get_param('title');
         $noteWorkspacesArrayOfWorkspaceIds = [];
 
         if($note->get_param('workspaces') && strpos($note->get_param('workspaces'), ',') !== false){
             $noteWorkspaces = explode(',', $note->get_param('workspaces'));
-        }
-
-        // we might have only one category slug
-        if($note->get_param('workspaces') && strpos($note->get_param('workspaces'), ',') === false){
-            $category = get_term_by('slug', $noteWorkspaces, OLMEC_NOTEPRESS_TAXONOMY_NAME);
+        }else{
+            $category = get_term_by('slug', $note->get_param('workspaces'), OLMEC_NOTEPRESS_TAXONOMY_NAME);
             if($category instanceof \WP_Term){
                 $noteWorkspacesArrayOfWorkspaceIds[] = (int) $category->term_id;
             }
@@ -135,17 +158,45 @@ final class Notes
         if(count($noteWorkspacesArrayOfWorkspaceIds) > 0){
             foreach (explode(',', $note->get_param('workspaces')) as $workspace) {
                 delete_transient('notes_in_' . $workspace);
+                setNotesCount($workspace, true);
             }
         }elseif (count($noteWorkspacesArrayOfWorkspaceIds) === 1) {
             delete_transient('notes_in_' . $note->get_param('workspaces'));
+            setNotesCount($note->get_param('workspaces'), true);
         }
         delete_transient(self::ALL_NOTES_CACHE_KEY);
 
-        wp_send_json(get_post($response));
+        $newNoteInfos = get_post($response);
+        $workspacesAsWpTerms = get_the_terms($newNoteInfos, 'workspaces');
+        $workspacesArray = [];
+        if(!is_wp_error($workspacesAsWpTerms) && is_array($workspacesAsWpTerms)){
+            foreach ($workspacesAsWpTerms as $workspace) {
+                $workspacesArray[] = $workspace->name;
+                delete_transient('notes_in_' . $workspace->name);
+            }
+        }
+
+        $authorAvatar = get_avatar_url(get_the_author_meta('ID', $newNoteInfos->post_author), ['size' => 450]);
+        $author = new Author(
+            (int) get_the_author_meta('id', $newNoteInfos->post_author),
+            get_the_author_meta('display_name', $newNoteInfos->post_author),
+            $authorAvatar ? $authorAvatar : null
+        );
+        $newNote = new Note(
+            get_the_title($newNoteInfos), 
+            $newNoteInfos->ID, 
+            $author,
+            '',
+            is_array($workspacesArray) ? implode(',', $workspacesArray) : '',
+            get_the_date('c', $newNoteInfos),
+            get_the_modified_date('c', $newNoteInfos)
+        );
+
+        wp_send_json($newNote);
         exit;
     }
 
-    function update(\WP_REST_Request $note) {
+    public function update(\WP_REST_Request $note) {
         $noteId = $note->get_param('id');
         $noteWorkspaces = get_the_terms($noteId, 'workspaces');
         $noteBody = json_decode($note->get_body(), true);
@@ -175,7 +226,7 @@ final class Notes
         return (bool) $response;
     }
 
-    function delete(int $noteId) {
+    public function delete(int $noteId) {
         $post = get_post($noteId);
         $response = null;
         if ($post) {
@@ -188,6 +239,7 @@ final class Notes
             if(is_array($noteWorkspaces)){
                 foreach ($noteWorkspaces as $noteWorkspace) {
                     delete_transient('notes_in_' . $noteWorkspace->slug);
+                    setNotesCount($noteWorkspace->slug, false);
                 }
             }
             wp_send_json('Note ' . $response->post_name . ' deleted');
@@ -198,7 +250,7 @@ final class Notes
         exit;
     }
 
-    function search(string $keyWord, int $pageNumber = 1) {
+    public function search(string $keyWord, int $pageNumber = 1) {
         $cacheKey = 'notes_search_' . md5(trim($keyWord));
         $cachedNotes = get_transient($cacheKey);
 
@@ -211,7 +263,7 @@ final class Notes
             'post_type' => 'notes',
             'post_status' => 'publish',
             's' => $keyWord,
-            'posts_per_page' => self::POST_PER_PAGE,
+            'posts_per_page' => self::NOTES_PER_PAGE,
             'paged' => $pageNumber,
         ];
     
@@ -225,6 +277,7 @@ final class Notes
         }
 
         while ($notesQuery->have_posts()) {
+            global $post;
             $notesQuery->the_post();
             $authorAvatar = get_avatar_url(get_the_author_meta('ID'), ['size' => 450]);
             $author = new Author(
@@ -233,11 +286,20 @@ final class Notes
                 $authorAvatar ? $authorAvatar : null
             );
 
+            $workspacesAsWpTerms = get_the_terms($post, 'workspaces');
+            $workspacesArray = [];
+            if(!is_wp_error($workspacesAsWpTerms) && is_array($workspacesAsWpTerms)){
+                foreach ($workspacesAsWpTerms as $workspace) {
+                    $workspacesArray[] = $workspace->name;
+                }
+            }
+
             $notesArray[] = new Note(
                 get_the_title(), 
                 get_the_ID(), 
                 $author,
                 get_the_content(),
+                is_array($workspacesArray) ? implode(',', $workspacesArray) : '',
                 get_the_date('c'),
                 get_the_modified_date('c')
             );
@@ -256,7 +318,7 @@ final class Notes
             exit;
         }
 
-        $cacheKey = 'notes_in_' . $workspace;
+        $cacheKey = 'notes_in_' . $workspace . '_' . $pageNumber;
         $cachedNotes = get_transient($cacheKey);
 
         if((bool) $cachedNotes){
@@ -266,7 +328,7 @@ final class Notes
 
         $args = [
             'post_type' => 'notes',
-            'posts_per_page' => self::POST_PER_PAGE,
+            'posts_per_page' => self::NOTES_PER_PAGE,
             'paged' => $pageNumber,
             'tax_query' => [
                 [
@@ -282,6 +344,7 @@ final class Notes
 
         if($notesQuery->have_posts()){
             while ($notesQuery->have_posts()) {
+                global $post;
                 $notesQuery->the_post();
 
                 $authorAvatar = get_avatar_url(get_the_author_meta('ID'), ['size' => 450]);
@@ -291,18 +354,33 @@ final class Notes
                     $authorAvatar ? $authorAvatar : null
                 );
 
+                $workspacesAsWpTerms = get_the_terms($post, 'workspaces');
+                $workspacesArray = [];
+                if(!is_wp_error($workspacesAsWpTerms) && is_array($workspacesAsWpTerms)){
+                    foreach ($workspacesAsWpTerms as $workspace) {
+                        $workspacesArray[] = $workspace->name;
+                    }
+                }
+
                 $notesArray[] = new Note(
                     get_the_title(), 
                     get_the_ID(), 
                     $author,
                     excerptFromText(get_the_content()), // Here we also do not need to send the full text
+                    is_array($workspacesArray) ? implode(',', $workspacesArray) : '',
                     get_the_date('c'),
                     get_the_modified_date('c')
                 );
             }
 
-            set_transient($cacheKey, $notesArray, 30);
-            wp_send_json($notesArray);
+            $createResponse = [
+                'total' => getNotesCount(),
+                'pageNumber' => $pageNumber,
+                'notes' => $notesArray 
+            ];
+
+            set_transient($cacheKey, $createResponse, 30);
+            wp_send_json($createResponse);
             wp_reset_postdata();
             exit;
         }

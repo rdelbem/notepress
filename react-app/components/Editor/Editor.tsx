@@ -25,10 +25,11 @@ import { useParams } from "react-router-dom";
 import { api, response } from "../../slices/fetch";
 import LoadingBar from "react-top-loading-bar";
 import { darkYellow, magenta } from "../../colors";
+import { Note } from "../../types";
 
 export const Editor = () => {
   const { id } = useParams();
-  const [note, setNote] = useState<response | null>(null);
+  const [note, setNote] = useState<response<Note> | null>(null);
   const [progress, setProgress] = useState(0);
   const ref = useRef<MDXEditorMethods>(null);
 
@@ -36,8 +37,8 @@ export const Editor = () => {
     const fetchNote = async () => {
       setProgress(30);
       try {
-        const response = await api.get(`notes/${id}`);
-        setNote(response);
+        const response = await api.get<Note>(`notes/${id}`);
+        if(response && response.data) setNote(response);
       } catch (error) {
         setProgress(100);
         console.error("Erro ao buscar nota:", error);

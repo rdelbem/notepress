@@ -1,9 +1,11 @@
-import React from "react";
+import React, { useEffect } from "react";
 import styled from "styled-components";
 import { darkGrey, darkYellow, grey as customGrey } from "../../colors";
-import { useSelector } from "react-redux";
-import { RootState } from "../../store";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../../store";
 import { Link } from "react-router-dom";
+import ReactPaginate from "react-paginate";
+import { fetchWorkspaceData } from "../../slices/workspaces";
 
 const StyledSideNav = styled.div`
   position: fixed;
@@ -45,12 +47,22 @@ const StyledLi = styled.li`
 `;
 
 export const SideNav = () => {
+  const dispatch = useDispatch<AppDispatch>();
   const { data, status, error } = useSelector(
     (state: RootState) => state.workspaces
   );
+  
+  useEffect(() => {
+    dispatch(fetchWorkspaceData(0));
+  }, [dispatch]);
 
   const loading = status === "loading";
   const failed = status === "failed";
+
+  const handlePageClick = ({selected}: {selected: number}) => {
+    // WordPress starts its pagination count at 1 😔
+    dispatch(fetchWorkspaceData(selected += 1));
+  };
 
   return (
     <StyledSideNav>
@@ -63,16 +75,30 @@ export const SideNav = () => {
               <Link to={"/notepress/"}>
                 <StyledLi>All notes</StyledLi>
               </Link>
-              {data &&
-                data.length > 0 &&
-                data.map((workspace) => (
-                  <Link to={`/notepress/workspace/${workspace.name}`} key={workspace.id}>
+              {data?.workspaces &&
+                data.workspaces.length > 0 &&
+                data.workspaces.map((workspace) => (
+                  <Link
+                    to={`/notepress/workspace/${workspace.name}`}
+                    key={workspace.id}
+                  >
                     <li>{workspace.name}</li>
                   </Link>
                 ))}
             </ul>
           )}
         </StyledMenuContainer>
+      )}
+      {data?.total && data.total > 10 && (
+        <ReactPaginate
+          breakLabel="..."
+          nextLabel=">"
+          previousLabel="<"
+          onPageChange={handlePageClick}
+          pageRangeDisplayed={4}
+          pageCount={data?.total / 10}
+          renderOnZeroPageCount={null}
+        />
       )}
     </StyledSideNav>
   );

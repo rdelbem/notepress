@@ -6,7 +6,7 @@ import { useDispatch } from "react-redux";
 import { fetchWorkspaceData } from "./slices/workspaces";
 import { AppDispatch } from "./store";
 import { NotesListView } from "./components/NotesListView/NotesListView";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, useParams } from "react-router-dom";
 import { Editor } from "./components/Editor";
 import { TopBar } from "./components/TopBar";
 
@@ -30,12 +30,6 @@ const Content = styled.div`
 `;
 
 export const App = () => {
-  const dispatch = useDispatch<AppDispatch>();
-
-  useEffect(() => {
-    dispatch(fetchWorkspaceData());
-  }, [dispatch]);
-
   return (
     <BrowserRouter>
       <SideNav />

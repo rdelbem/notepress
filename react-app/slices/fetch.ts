@@ -1,5 +1,3 @@
-import { CreateNoteInput } from "../types";
-
 type ActionType = {
   GET: "GET";
   POST: "POST";
@@ -7,18 +5,18 @@ type ActionType = {
   DELETE: "DELETE";
 };
 
-export type response = {
+export type response<T> = {
   loading: boolean;
-  data?: Promise<any>;
+  data?: T;
   error?: Error;
 } 
 
-const fetchWrapper = async (
+const fetchWrapper = async <T>(
   actionType: keyof ActionType,
   route: string,
   body?: any
-) => {
-  let response: response = { loading: true, data: undefined, error: undefined };
+): Promise<response<T>> => {
+  let response: response<T> = { loading: true, data: undefined, error: undefined };
   try {
     const fetchResponse = await fetch(`${window.api_url}/${route}`, {
       method: actionType,
@@ -33,8 +31,8 @@ const fetchWrapper = async (
       throw new Error("Network response was not ok");
     }
 
-    const data = await fetchResponse.json();
-    response = { ...response, loading: false, data };
+    const data: T = await fetchResponse.json();
+    return { loading: false, data, error: undefined };
   } catch (error) {
     response = {
       ...response,
@@ -47,8 +45,9 @@ const fetchWrapper = async (
 };
 
 export const api = {
-  get: async (route: string) => fetchWrapper("GET", route),
-  patch: async (route: string, body: any) => fetchWrapper("PATCH", route, body),
-  delete: async (route: string) => fetchWrapper("DELETE", route),
-  create: async (route: string, body: CreateNoteInput) => fetchWrapper("POST", route, body)
+  get: async <T>(route: string) => fetchWrapper<T>("GET", route),
+  // TODO: update body type
+  patch: async <T>(route: string, body: any) => fetchWrapper<T>("PATCH", route, body),
+  delete: async <T>(route: string) => fetchWrapper<T>("DELETE", route),
+  create: async <T>(route: string, body: any) => fetchWrapper<T>("POST", route, body)
 };

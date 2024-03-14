@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import { darkGrey, darkYellow, grey, magenta } from "../../colors";
 import { UserBox } from "../UserBox";
@@ -7,7 +7,9 @@ import { PopUp } from "../PopUp";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { CreateNoteInput } from "../../types";
+import { CreateNoteInput, Note } from "../../types";
+import { useDispatch } from "react-redux";
+import { addNote } from "../../slices/notes";
 
 const TopBarContainer = styled.div`
   position: fixed;
@@ -22,7 +24,7 @@ const TopBarContainer = styled.div`
   align-items: center;
 `;
 const AddNoteButton = styled.button`
-  background: ${darkYellow};
+  background: ${magenta};
   color: white;
   border: 1px solid ${darkGrey};
   padding: 5px 30px;
@@ -87,20 +89,25 @@ const createNoteSchema = yup.object().shape({
 
 export const TopBar = () => {
   const [showModal, setShowModal] = useState(false);
+  const dispatch = useDispatch();
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
-    setValue,
   } = useForm({
     resolver: yupResolver(createNoteSchema),
   });
 
-  const onSubmit = (inputUpdate: CreateNoteInput) => {
+  const onSubmit = async (inputUpdate: CreateNoteInput) => {
     setShowModal(false);
     reset();
-    api.create("/notes", inputUpdate);
+    try {
+      const response = await api.create<Note>("/notes", inputUpdate);
+      if(response.data) dispatch(addNote(await response.data));
+    } catch (error) {
+      console.error("Error:", error);
+    }  
   };
 
   return (
@@ -138,6 +145,10 @@ export const TopBar = () => {
                 onClick={() => {
                   setShowModal(false);
                   reset();
+                }}
+                style={{
+                  backgroundColor: darkGrey,
+                  border: '1px solid white'
                 }}
               >
                 Dismiss

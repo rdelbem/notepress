@@ -3,7 +3,7 @@ import { Note } from "../../types";
 import styled from "styled-components";
 import { lightGreen as customLightGreen, darkGrey, darkYellow } from "../../colors";
 import { format } from "date-fns";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { IoTrashBin } from "react-icons/io5";
@@ -83,8 +83,10 @@ export const NoteCard = ({
   created_at: createdAt,
   updated_at: updatedAt,
   id,
+  workspaces,
   removeNote,
 }: Note & { removeNote: (noteId: number) => void }) => {
+  const {term} = useParams();
   const [showModal, setShowModal] = useState(false);
   const handleDelete = () => {
     api
@@ -98,7 +100,7 @@ export const NoteCard = ({
       <CardContainer>
         <TitleAndIconsContainer>
           <Title>
-            <p>{title}</p>
+            <p>{`${!term ? workspaces + ' /' : ''}${title}`}</p>
           </Title>
           <StyledButton onClick={() => setShowModal(true)}>
             <IoTrashBin />
@@ -118,7 +120,10 @@ export const NoteCard = ({
         <>
           <p>Are you sure you want to delete this note?</p>
           <PopUpButton onClick={() => setShowModal(false)}>No</PopUpButton>
-          <PopUpButton onClick={handleDelete}>Yes</PopUpButton>
+          <PopUpButton onClick={handleDelete} style={{
+            backgroundColor: darkGrey,
+            border: '1px solid white'
+          }}>Yes</PopUpButton>
         </>
       </PopUp>
     </>

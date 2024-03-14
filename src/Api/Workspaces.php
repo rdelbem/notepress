@@ -3,6 +3,7 @@
 namespace Olmec\OlmecNotepress\Api;
 
 use Olmec\OlmecNotepress\Types\Workspace;
+use function Olmec\OlmecNotepress\Util\getWorkspacesCount;
 
 if(!defined('ABSPATH')){
     exit;
@@ -31,11 +32,11 @@ final class Workspaces {
 
     function getAll($pageNumber = 1, $termsPerPage = 10) {
         $offset = ($pageNumber - 1) * $termsPerPage;
-        $cacheKey = 'workspaces_get_all';
+        $cacheKey = 'workspaces_get_all_' . $pageNumber;
         $cachedWorkspaces = get_transient($cacheKey);
 
         if ((bool) $cachedWorkspaces) {
-            wp_send_json($this->mapTermsToWorkspaces($cachedWorkspaces));
+            wp_send_json($cachedWorkspaces);
             exit;
         }
 
@@ -51,9 +52,15 @@ final class Workspaces {
             exit;
         }
 
-        set_transient($cacheKey, $terms, 60);
+        $createResponse = [
+            'total' => getWorkspacesCount(),
+            'pageNumber' => $pageNumber,
+            'workspaces' => $this->mapTermsToWorkspaces($terms)
+        ];
 
-        wp_send_json($this->mapTermsToWorkspaces($terms));
+        set_transient($cacheKey, $createResponse, 60);
+
+        wp_send_json($createResponse);
         exit;
     }
 

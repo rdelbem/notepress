@@ -44,6 +44,38 @@ const GlobalStyle = createGlobalStyle`
       margin: 7px;
       position: sticky;
   }
+
+  ul[role=navigation] {
+    padding: 0;
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    a {
+      font-size: .75rem;
+    }
+
+    li {
+      margin: 0 .1rem;
+      padding: 0 .3rem;
+      border-radius: 4px;
+      width: .75rem;
+      text-align: center;
+      cursor: pointer;
+
+      &:hover{
+          background-color: #363636;
+        }
+      &.selected{
+        font-weight: bolder;
+        background-color: #3f3f3f;
+      }
+
+      a {
+        text-decoration: none;
+        color: ${whiteText}; 
+      }
+    }
+  }
 `;
 
 document.addEventListener("DOMContentLoaded", () => {

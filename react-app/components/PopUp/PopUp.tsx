@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import { CSSTransition } from "react-transition-group";
 import { grey } from "../../colors";
@@ -13,6 +13,7 @@ const ModalBackdrop = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 99999;
 `;
 
 const ModalContent = styled.div`
@@ -21,9 +22,16 @@ const ModalContent = styled.div`
   padding: 20px;
   border-radius: 5px;
   transition: opacity 0.3s ease-in-out;
+  z-index: 99999;
 `;
 
-export const PopUp = ({ inProp, children }: {inProp: boolean, children: JSX.Element}) => {
+export const PopUp = ({
+  inProp,
+  children,
+}: {
+  inProp: boolean;
+  children: JSX.Element;
+}) => {
   return (
     <CSSTransition in={inProp} timeout={300} classNames="fade" unmountOnExit>
       <ModalBackdrop>
