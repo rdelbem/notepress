@@ -3,7 +3,7 @@
 namespace Olmec\OlmecNotepress\Util;
 
 if (!defined('ABSPATH')) {
-  exit;
+    exit;
 }
 
 /**
@@ -22,11 +22,11 @@ if (!defined('ABSPATH')) {
  */
 function excerptFromText($string, $limit = 120)
 {
-  if (strlen($string) <= $limit)
-    return $string;
-  $cutMark = substr($string, 0, $limit);
-  $lastSpace = strrpos($cutMark, ' ');
-  return $lastSpace !== false ? substr($cutMark, 0, $lastSpace) : $cutMark;
+    if (strlen($string) <= $limit)
+        return $string;
+    $cutMark = substr($string, 0, $limit);
+    $lastSpace = strrpos($cutMark, ' ');
+    return $lastSpace !== false ? substr($cutMark, 0, $lastSpace) : $cutMark;
 }
 
 /**
@@ -35,9 +35,9 @@ function excerptFromText($string, $limit = 120)
  *
  * @return integer
  */
-function getWorkspacesCount()
+function getWorkspacesCount(): int
 {
-  return (int) get_option('total_workspaces', 0);
+    return (int) get_option('total_workspaces', 0);
 }
 
 /**
@@ -46,11 +46,11 @@ function getWorkspacesCount()
  * 
  * @return integer
  */
-function getNotesCount(string|bool $slug = false)
+function getNotesCount(string|bool $slug = false): int
 {
-  if ($slug)
-    return (int) get_option('total_notes_' . $slug, 0);
-  return (int) get_option('total_notes', 0);
+    if ($slug)
+        return (int) get_option('total_notes_' . $slug, 0);
+    return (int) get_option('total_notes', 0);
 }
 
 /**
@@ -60,8 +60,30 @@ function getNotesCount(string|bool $slug = false)
  * @param bool $increase
  * @return bool
  */
-function setNotesCount(string $slug, bool $increase)
+function setNotesCount(string $slug, bool $increase): bool
 {
-  $increase ? $notesCount = (int) getNotesCount($slug) + 1 : $notesCount = (int) getNotesCount($slug) - 1;
-  return update_option($slug, $notesCount, true);
+    $increase ? $notesCount = (int) getNotesCount($slug) + 1 : $notesCount = (int) getNotesCount($slug) - 1;
+    return update_option($slug, $notesCount, true);
+}
+
+/**
+ * Returns all the workspaces ids a given note is assigned to.
+ *
+ * @param \WP_Post $post
+ * @return string[]
+ */
+function getNoteWorkspaces(\WP_Post $post): array
+{
+    $terms = get_the_terms($post->ID, 'workspaces');
+
+    if (is_wp_error($terms) || !is_array($terms)) {
+        return ['error' => 'Couldn`t find category terms or slugs for the provided note id.'];
+    }
+
+    $workspaces = [];
+    foreach ($terms as $term) {
+        $workspaces[] = $term->term_id;
+    }
+
+    return $workspaces;
 }

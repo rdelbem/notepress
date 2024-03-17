@@ -84,7 +84,7 @@ const LabelSmall = styled.small`
 
 const createNoteSchema = yup.object().shape({
   title: yup.string().required(),
-  workspaces: yup.string(),
+  workspaces: yup.string().optional(),
 });
 
 export const TopBar = () => {
@@ -103,7 +103,7 @@ export const TopBar = () => {
     setShowModal(false);
     reset();
     try {
-      const response = await api.create<Note>("/notes", inputUpdate);
+      const response = await api.create<Note>("notes", inputUpdate);
       if(response.data) dispatch(addNote(await response.data));
     } catch (error) {
       console.error("Error:", error);

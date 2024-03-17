@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import { darkGrey, lightGreen, grey as customGrey } from "../../colors";
+import { darkGrey, lightGreen } from "../../colors";
 
 // the user is added to the global window object on the WP side
 

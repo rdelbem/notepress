@@ -149,7 +149,7 @@ final class Notes
         $response = wp_insert_post($args, true);
 
         if(is_wp_error($response)){
-            $errorMessage = 'Update failed, unknown error';
+            $errorMessage = 'Unknown error while creating a note';
             $response !== null ? wp_send_json($response->get_error_message() ?? $errorMessage) : wp_send_json($errorMessage);
             exit;
         }
