@@ -19,6 +19,7 @@ $userAvatarUrl = get_avatar_url($userObject->ID) !== 0 ? get_avatar_url($userObj
 <head>
     <meta charset="<?php bloginfo('charset') ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Notepress</title>
     <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,700&display=swap" rel="stylesheet">
     <?php wp_head() ?>
 </head>

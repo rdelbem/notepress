@@ -40,6 +40,10 @@ final class CoreLoader
      */
     function takeOverControl(): void
     {
+        if (defined('WP_CLI') && WP_CLI) {
+            return;
+        }
+        
         if (!is_user_logged_in() && !is_login()) {
             wp_redirect(wp_login_url());
             exit;

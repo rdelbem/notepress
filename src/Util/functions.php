@@ -46,10 +46,10 @@ function getWorkspacesCount(): int
  * 
  * @return integer
  */
-function getNotesCount(string|bool $slug = false): int
+function getNotesCount(string|bool $name = false): int
 {
-    if ($slug)
-        return (int) get_option('total_notes_' . $slug, 0);
+    if ($name)
+        return (int) get_option($name, 0);
     return (int) get_option('total_notes', 0);
 }
 

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { darkGrey, darkYellow, grey, magenta } from "../../colors";
+import { theme } from "../../colors";
 import { UserBox } from "../UserBox";
 import { api } from "../../slices/fetch";
 import { PopUp } from "../PopUp";
@@ -8,25 +8,15 @@ import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { CreateNoteInput, Note } from "../../types";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { addNote } from "../../slices/notes";
+import { RootState } from "../../store";
+import LoadingBar from "react-top-loading-bar";
 
-const TopBarContainer = styled.div`
-  position: fixed;
-  width: 100%;
-  height: 61px;
-  border: 1px solid ${grey};
-  z-index: 1000;
-  background-color: ${darkGrey};
-  display: flex;
-  justify-content: space-between;
-  padding: 1rem 0;
-  align-items: center;
-`;
 const AddNoteButton = styled.button`
-  background: ${magenta};
+  background: ${theme.pallete.magenta};
   color: white;
-  border: 1px solid ${darkGrey};
+  border: 1px solid ${theme.pallete.darkGrey};
   padding: 5px 30px;
   font: inherit;
   cursor: pointer;
@@ -41,9 +31,9 @@ const UserBoxContainer = styled.div`
   margin: 0 1rem;
 `;
 const PopUpButton = styled.button`
-  background: ${darkYellow};
-  color: white;
-  border: 1px solid ${darkGrey};
+  background: ${theme.pallete.darkYellow};
+  color: ${theme.text.color.white};
+  border: 1px solid ${theme.pallete.darkGrey};
   padding: 5px;
   font: inherit;
   cursor: pointer;
@@ -60,16 +50,17 @@ const InputContainer = styled.div`
 
   & input {
     min-width: 250px;
-    background-color: ${darkGrey};
-    border: 1px solid ${darkYellow};
+    background-color: ${theme.pallete.darkGrey};
+    border: 1px solid ${theme.pallete.darkGrey};
     padding: 0.6rem;
     font-size: 1rem;
-    caret-color: ${darkYellow};
+    caret-color: ${theme.pallete.darkYellow};
     color: white;
     margin-bottom: 1rem;
 
     &:focus {
       outline: none;
+      border: 1px solid ${theme.pallete.darkYellow};
     }
   }
   & label {
@@ -78,7 +69,7 @@ const InputContainer = styled.div`
 `;
 const LabelSmall = styled.small`
   font-size: 0.7rem;
-  color: ${magenta};
+  color: ${theme.pallete.magenta};
   font-weight: 700;
 `;
 
@@ -89,6 +80,10 @@ const createNoteSchema = yup.object().shape({
 
 export const TopBar = () => {
   const [showModal, setShowModal] = useState(false);
+  const [progress, setProgress] = useState(0)
+  const term = useSelector(
+    (state: RootState) => state.workspaceInView.currentTerm
+  );
   const dispatch = useDispatch();
   const {
     register,
@@ -97,29 +92,38 @@ export const TopBar = () => {
     reset,
   } = useForm({
     resolver: yupResolver(createNoteSchema),
+    defaultValues: {
+      workspaces: term,
+    },
   });
 
   const onSubmit = async (inputUpdate: CreateNoteInput) => {
     setShowModal(false);
     reset();
     try {
+      setProgress(30)
       const response = await api.create<Note>("notes", inputUpdate);
-      if(response.data) dispatch(addNote(await response.data));
+      if (response.data) {
+        dispatch(addNote(response.data));
+        setProgress(100)
+      }
     } catch (error) {
+      setProgress(100)
       console.error("Error:", error);
-    }  
+    }
   };
 
   return (
     <>
-      <TopBarContainer>
-        <UserBoxContainer>
-          <UserBox />
-        </UserBoxContainer>
-        <AddNoteButton onClick={() => setShowModal(true)}>
-          Add Note
-        </AddNoteButton>
-      </TopBarContainer>
+      <LoadingBar
+        color={theme.pallete.magenta}
+        progress={progress}
+        onLoaderFinished={() => setProgress(0)}
+      />
+      <UserBoxContainer>
+        <UserBox />
+      </UserBoxContainer>
+      <AddNoteButton onClick={() => setShowModal(true)}>Add Note</AddNoteButton>
       {showModal ? (
         <PopUp inProp={showModal}>
           <>
@@ -138,7 +142,12 @@ export const TopBar = () => {
                 <label htmlFor="workspace">
                   Workspace, use commas to separate multiple workspaces
                 </label>
-                <input type="text" id="workspace" {...register("workspaces")} />
+                <input
+                  type="text"
+                  id="workspace"
+                  {...register("workspaces")}
+                  defaultValue={term}
+                />
               </InputContainer>
               <PopUpButton type="submit">Create</PopUpButton>
               <PopUpButton
@@ -147,8 +156,8 @@ export const TopBar = () => {
                   reset();
                 }}
                 style={{
-                  backgroundColor: darkGrey,
-                  border: '1px solid white'
+                  backgroundColor: theme.pallete.darkGrey,
+                  border: "1px solid white",
                 }}
               >
                 Dismiss

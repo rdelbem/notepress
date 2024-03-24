@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React from "react";
 import styled from "styled-components";
 import { CSSTransition } from "react-transition-group";
-import { grey } from "../../colors";
+import { theme } from "../../colors";
 
 const ModalBackdrop = styled.div`
   position: fixed;
@@ -15,9 +15,8 @@ const ModalBackdrop = styled.div`
   align-items: center;
   z-index: 99999;
 `;
-
 const ModalContent = styled.div`
-  background-color: ${grey};
+  background-color: ${theme.pallete.grey};
   color: white;
   padding: 20px;
   border-radius: 5px;

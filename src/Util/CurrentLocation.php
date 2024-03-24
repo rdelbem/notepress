@@ -13,6 +13,10 @@ trait CurrentLocation
 {
     function currentLocationIs()
     {
+        if (defined('WP_CLI') && WP_CLI) {
+            return;
+        }
+        
         if (
             isset($_SERVER['HTTPS']) &&
             ($_SERVER['HTTPS'] == 'on' || $_SERVER['HTTPS'] == 1) ||

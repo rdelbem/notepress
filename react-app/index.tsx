@@ -4,7 +4,7 @@ import { Provider } from "react-redux";
 import { store } from "./store";
 import { App } from "./App";
 import { createGlobalStyle } from "styled-components";
-import { darkGrey, whiteText } from "./colors";
+import { theme } from "./colors";
 
 export * from "./colors";
 
@@ -13,11 +13,11 @@ const GlobalStyle = createGlobalStyle`
     margin: 0;
     padding: 0;
     font-family: 'Roboto', Arial, sans-serif;
-    background-color: ${darkGrey};
+    background-color: ${theme.pallete.darkGrey};
   }
 
   p, li, ul, a {
-    color: ${whiteText};
+    color: ${theme.text.color.white};
     font-size: 1rem;
   }
 
@@ -40,7 +40,6 @@ const GlobalStyle = createGlobalStyle`
   }
 
   [role=toolbar] {
-      top: 98px;
       margin: 7px;
       position: sticky;
   }
@@ -72,7 +71,7 @@ const GlobalStyle = createGlobalStyle`
 
       a {
         text-decoration: none;
-        color: ${whiteText}; 
+        color: ${theme.text.color.white}; 
       }
     }
   }

@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { Note } from "../../types";
 import styled from "styled-components";
-import { lightGreen as customLightGreen, darkGrey, darkYellow } from "../../colors";
-import { format } from "date-fns";
+import { theme } from "../../colors";
+import { format as fromatDate } from "date-fns";
 import { Link, useParams } from "react-router-dom";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -17,8 +17,8 @@ const CardContainer = styled.div`
   display: flex;
   flex-direction: column;
   border-radius: 10px;
-  background-color: ${customLightGreen};
-  width: 300px;
+  background-color: ${theme.pallete.lightGreen};
+  width: 297px;
   overflow: hidden;
   height: 200px;
   padding: 10px;
@@ -28,7 +28,7 @@ const Content = styled.div`
     margin: 0;
   }
   text-align: justify;
-  height: 120px;
+  height: 145px;
   overflow: hidden;
   margin-top: 10px;
 `;
@@ -45,13 +45,13 @@ const DateContainer = styled.div`
     color: white;
     font-size: 0.8rem;
     display: block;
-    color: ${darkGrey};
+    color: ${theme.pallete.darkGrey};
     font-weight: lighter;
   }
 `;
 const TitleAndIconsContainer = styled.div`
   justify-content: space-between;
-  color: ${darkGrey};
+  color: ${theme.pallete.darkGrey};
   display: flex;
 `;
 const StyledButton = styled.button`
@@ -64,29 +64,28 @@ const StyledButton = styled.button`
   outline: inherit;
 `;
 const PopUpButton = styled.button`
-  background: ${darkYellow};
-  color: white;
-  border: 1px solid ${darkGrey};
+  background: ${theme.pallete.darkYellow};
+  color: ${theme.text.color.white};
+  border: 1px solid ${theme.pallete.darkGrey};
   margin: 5px;
   padding: 5px;
   font: inherit;
   cursor: pointer;
   outline: inherit;
   border-radius: 5px;
-  font-size: .75rem;
+  font-size: 0.75rem;
   font-weight: bold;
 `;
 
 export const NoteCard = ({
   content,
   title,
-  created_at: createdAt,
   updated_at: updatedAt,
   id,
   workspaces,
   removeNote,
 }: Note & { removeNote: (noteId: number) => void }) => {
-  const {term} = useParams();
+  const { term } = useParams();
   const [showModal, setShowModal] = useState(false);
   const handleDelete = () => {
     api
@@ -100,7 +99,7 @@ export const NoteCard = ({
       <CardContainer>
         <TitleAndIconsContainer>
           <Title>
-            <p>{`${!term ? workspaces + ' /' : ''}${title}`}</p>
+            <p>{`${!term ? workspaces + " /" : ""}${title}`}</p>
           </Title>
           <StyledButton onClick={() => setShowModal(true)}>
             <IoTrashBin />
@@ -112,20 +111,26 @@ export const NoteCard = ({
           </Content>
         </StyledLink>
         <DateContainer>
-          <small>Created at - {format(createdAt, "MM/dd/yyyy")}</small>
-          <small>Updated at - {format(updatedAt, "MM/dd/yyyy")}</small>
+          <small>{fromatDate(updatedAt, "MM/dd/yyyy")}</small>
         </DateContainer>
       </CardContainer>
-      <PopUp inProp={showModal}>
-        <>
-          <p>Are you sure you want to delete this note?</p>
-          <PopUpButton onClick={() => setShowModal(false)}>No</PopUpButton>
-          <PopUpButton onClick={handleDelete} style={{
-            backgroundColor: darkGrey,
-            border: '1px solid white'
-          }}>Yes</PopUpButton>
-        </>
-      </PopUp>
+      {showModal ? (
+        <PopUp inProp={showModal}>
+          <>
+            <p>Are you sure you want to delete this note?</p>
+            <PopUpButton onClick={() => setShowModal(false)}>No</PopUpButton>
+            <PopUpButton
+              onClick={handleDelete}
+              style={{
+                backgroundColor: theme.pallete.darkGrey,
+                border: "1px solid white",
+              }}
+            >
+              Yes
+            </PopUpButton>
+          </>
+        </PopUp>
+      ) : null}
     </>
   );
 };

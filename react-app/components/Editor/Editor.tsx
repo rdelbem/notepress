@@ -24,7 +24,7 @@ import {
 import { useParams } from "react-router-dom";
 import { api, response } from "../../slices/fetch";
 import LoadingBar from "react-top-loading-bar";
-import { darkYellow, magenta } from "../../colors";
+import {  theme } from "../../colors";
 import { Note } from "../../types";
 
 export const Editor = () => {
@@ -62,13 +62,13 @@ export const Editor = () => {
   return (
     <>
       <LoadingBar
-        color={magenta}
+        color={theme.pallete.magenta}
         progress={progress}
         onLoaderFinished={() => setProgress(0)}
       />
       {!note?.loading && note?.data && (
           <MDXEditor
-            // TODO: we need to type the data type data is with a generic
+            // TODO: we need to type the data what a generic
             ref={ref}
             markdown={note.data.content}
             className="dark-theme dark-editor"
@@ -91,7 +91,7 @@ export const Editor = () => {
                     <InsertThematicBreak />
                     <InsertImage />
                     <Button onClick={() => handleUpdate(ref.current?.getMarkdown())} style={{
-                      border: `1px solid ${darkYellow}`
+                      border: `1px solid ${theme.pallete.darkYellow}`
                     }}>
                       Save
                     </Button>

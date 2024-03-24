@@ -35,7 +35,9 @@ export const fetchNotesByCategory = createAsyncThunk<
     try {
       const page = pageNumber === 0 ? 1 : pageNumber;
       const endpoint =
-        category !== "all" ? `notes/workspace?term=${category}&page=${page}` : `notes?page=${page}`;
+        category !== "all"
+          ? `notes/workspace?term=${category}&page=${page}`
+          : `notes?page=${page}`;
       const { data } = await api.get<NotesResponse>(endpoint);
       if (data) {
         return data;
@@ -58,18 +60,19 @@ const slice = createSlice({
   initialState,
   reducers: {
     removeNote: (state, action: PayloadAction<number>) => {
-      if(state.data && state.data.notes){
+      if (state.data && state.data.notes) {
         state.data = {
           ...state.data,
-          notes: state.data?.notes.filter((note) => note.id !== action.payload)
-        }
+          notes: state.data?.notes.filter((note) => note.id !== action.payload),
+        };
       }
     },
     addNote: (state, action: PayloadAction<Note>) => {
       if (Array.isArray(state.data?.notes)) {
         state.data = {
-          ...state.data,
-          notes: [...(state.data.notes || []), action.payload]
+          notes: [action.payload, ...state.data.notes],
+          pageNumber: state.data.pageNumber,
+          total: state.data.total,
         };
       }
     },

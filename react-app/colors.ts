@@ -1,7 +1,15 @@
-export const darkGrey = '#303030';
-export const grey = '#373737';
-export const lightGreyText = '#a3a3a3';
-export const whiteText = '#f4f4f4';
-export const lightGreen = '#36b4a6';
-export const magenta = '#f11946';
-export const darkYellow = '#d49d29';
+export const theme = {
+    pallete: {
+        darkGrey: '#303030',
+        grey: '#373737',
+        lightGreen: '#36b4a6',
+        magenta: '#f11946',
+        darkYellow: '#d49d29',
+    },
+    text: {
+        color: {
+            lightGrey: '#a3a3a3',
+            white: '#f4f4f4',
+        }
+    }
+}

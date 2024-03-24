@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Note } from "../../types";
 import LoadingBar from "react-top-loading-bar";
-import { magenta } from "../../colors";
+import { theme } from "../../colors";
 import { NoteCard } from "../NoteCard/NoteCard";
 import styled from "styled-components";
 import { useDispatch, useSelector } from "react-redux";
@@ -10,7 +10,7 @@ import { AppDispatch, RootState } from "../../store";
 import { fetchNotesByCategory, removeNote } from "../../slices/notes";
 import ReactPaginate from "react-paginate";
 
-const gapPadding = "1.5rem";
+const gapPadding = "1.1rem";
 
 const Container = styled.div`
   display: flex;
@@ -57,12 +57,12 @@ export const NotesListView = () => {
   return (
     <>
       <LoadingBar
-        color={magenta}
+        color={theme.pallete.magenta}
         progress={progress}
         onLoaderFinished={() => setProgress(0)}
       />
       <Container>
-        {data?.notes && Array.isArray(data.notes) ? (
+        {data?.notes && Array.isArray(data.notes) && data.notes.length > 0 && (
           data.notes.map((note: Note) => {
             const noteWorkspaces: string | string[] | undefined =
               note.workspaces.split(",")
@@ -85,21 +85,19 @@ export const NotesListView = () => {
               <NoteCard {...note} key={note.id} removeNote={handleRemoveNote} />
             );
           })
-        ) : (
-          <p>No notes found for this workspace.</p>
         )}
       </Container>
-      {data?.total && data.total > 10 && (
+      {data?.total && data.total > 9 ? (
         <ReactPaginate
           breakLabel="..."
           nextLabel=">"
           previousLabel="<"
           onPageChange={handlePageClick}
           pageRangeDisplayed={4}
-          pageCount={data?.total / 10}
+          pageCount={data?.total / 9}
           renderOnZeroPageCount={null}
         />
-      )}
+      ) : null}
     </>
   );
 };

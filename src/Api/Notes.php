@@ -14,18 +14,10 @@ if(!defined('ABSPATH')){
 
 final class Notes
 {
-    const NOTES_PER_PAGE = 10;
+    const NOTES_PER_PAGE = 9;
     const ALL_NOTES_CACHE_KEY = 'notes_get_all';
 
     public function getAll(int $pageNumber = 1) {
-        $cacheKey = self::ALL_NOTES_CACHE_KEY . '_' . $pageNumber;
-        $cachedNotes = get_transient($cacheKey);
-
-        if((bool) $cachedNotes){
-            wp_send_json($cachedNotes);
-            exit;
-        }
-        
         $args = [
             'post_type' => 'notes',
             'post_status' => 'publish',
@@ -72,8 +64,6 @@ final class Notes
                 'pageNumber' => $pageNumber,
                 'notes' => $notesArray 
             ];
-
-            set_transient($cacheKey, $createResponse, 60);
 
             wp_send_json($createResponse);
             wp_reset_postdata();
@@ -122,7 +112,7 @@ final class Notes
         if($note->get_param('workspaces') && strpos($note->get_param('workspaces'), ',') !== false){
             $noteWorkspaces = explode(',', $note->get_param('workspaces'));
         }else{
-            $category = get_term_by('slug', $note->get_param('workspaces'), OLMEC_NOTEPRESS_TAXONOMY_NAME);
+            $category = get_term_by('name', $note->get_param('workspaces'), OLMEC_NOTEPRESS_TAXONOMY_NAME);
             if($category instanceof \WP_Term){
                 $noteWorkspacesArrayOfWorkspaceIds[] = (int) $category->term_id;
             }
@@ -130,7 +120,7 @@ final class Notes
 
         if(is_array($noteWorkspaces)){
             foreach ($noteWorkspaces as $workspaceName) {
-                $category = get_term_by('slug', $workspaceName, OLMEC_NOTEPRESS_TAXONOMY_NAME);
+                $category = get_term_by('name', $workspaceName, OLMEC_NOTEPRESS_TAXONOMY_NAME);
                 if($category instanceof \WP_Term){
                     $noteWorkspacesArrayOfWorkspaceIds[] = (int) $category->term_id;
                 }
@@ -154,17 +144,13 @@ final class Notes
             exit;
         }
 
-        // rebuild cache
         if(count($noteWorkspacesArrayOfWorkspaceIds) > 0){
             foreach (explode(',', $note->get_param('workspaces')) as $workspace) {
-                delete_transient('notes_in_' . $workspace);
                 setNotesCount($workspace, true);
             }
         }elseif (count($noteWorkspacesArrayOfWorkspaceIds) === 1) {
-            delete_transient('notes_in_' . $note->get_param('workspaces'));
             setNotesCount($note->get_param('workspaces'), true);
         }
-        delete_transient(self::ALL_NOTES_CACHE_KEY);
 
         $newNoteInfos = get_post($response);
         $workspacesAsWpTerms = get_the_terms($newNoteInfos, 'workspaces');
@@ -172,7 +158,6 @@ final class Notes
         if(!is_wp_error($workspacesAsWpTerms) && is_array($workspacesAsWpTerms)){
             foreach ($workspacesAsWpTerms as $workspace) {
                 $workspacesArray[] = $workspace->name;
-                delete_transient('notes_in_' . $workspace->name);
             }
         }
 
@@ -198,7 +183,6 @@ final class Notes
 
     public function update(\WP_REST_Request $note) {
         $noteId = $note->get_param('id');
-        $noteWorkspaces = get_the_terms($noteId, 'workspaces');
         $noteBody = json_decode($note->get_body(), true);
     
         if(!$noteId || !$noteBody) {
@@ -216,13 +200,6 @@ final class Notes
             exit;
         }
 
-        // delete cache, to force a rebuild on get
-        if(is_array($noteWorkspaces)){
-            foreach ($noteWorkspaces as $noteWorkspace) {
-                delete_transient('notes_in_' . $noteWorkspace->slug);
-            }
-        }
-        delete_transient(self::ALL_NOTES_CACHE_KEY);
         return (bool) $response;
     }
 
@@ -230,19 +207,11 @@ final class Notes
         $post = get_post($noteId);
         $response = null;
         if ($post) {
-            $noteWorkspaces = get_the_terms($noteId, 'workspaces');
             $response = wp_delete_post($noteId, true);
         }
 
-        if($response instanceof \WP_Post) {
-            delete_transient(self::ALL_NOTES_CACHE_KEY);
-            if(is_array($noteWorkspaces)){
-                foreach ($noteWorkspaces as $noteWorkspace) {
-                    delete_transient('notes_in_' . $noteWorkspace->slug);
-                    setNotesCount($noteWorkspace->slug, false);
-                }
-            }
-            wp_send_json('Note ' . $response->post_name . ' deleted');
+        if(!is_wp_error($response)) {
+            wp_send_json('Note ' . $response->post_name . ' deleted.' );
             exit;
         }
 
@@ -305,7 +274,7 @@ final class Notes
             );
         }
 
-        set_transient($cacheKey, $notesArray, 120);
+        set_transient($cacheKey, $notesArray, 60);
 
         wp_send_json($notesArray);
         wp_reset_postdata();
@@ -315,14 +284,6 @@ final class Notes
     public function getNotesByWorkspace(string $workspace, int $pageNumber = 1) {
         if(!$workspace) {
             wp_send_json('No posts found');
-            exit;
-        }
-
-        $cacheKey = 'notes_in_' . $workspace . '_' . $pageNumber;
-        $cachedNotes = get_transient($cacheKey);
-
-        if((bool) $cachedNotes){
-            wp_send_json($cachedNotes);
             exit;
         }
 
@@ -374,12 +335,11 @@ final class Notes
             }
 
             $createResponse = [
-                'total' => getNotesCount(),
+                'total' => getNotesCount($workspace->name),
                 'pageNumber' => $pageNumber,
                 'notes' => $notesArray 
             ];
 
-            set_transient($cacheKey, $createResponse, 30);
             wp_send_json($createResponse);
             wp_reset_postdata();
             exit;

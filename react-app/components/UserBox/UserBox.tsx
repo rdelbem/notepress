@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import { darkGrey, lightGreen } from "../../colors";
+import { theme } from "../../colors";
 
 // the user is added to the global window object on the WP side
 
@@ -18,14 +18,14 @@ const UserBoxContainer = styled.div`
 `;
 const RoundImageContainer = styled.div`
   border-radius: 1000px;
-  border: 3px solid ${lightGreen};
+  border: 3px solid ${theme.pallete.lightGreen};
   overflow: hidden;
   min-width: 56px;
   height: 56px;
 `;
 const RoundImageContainerInnerBorder = styled.div`
   border-radius: 1000px;
-  border: 3px solid ${darkGrey};
+  border: 3px solid ${theme.pallete.darkGrey};
   overflow: hidden;
   min-width: ${imgSize};
   height: ${imgSize};

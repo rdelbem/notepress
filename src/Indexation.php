@@ -121,11 +121,11 @@ final class Indexation
 
             foreach ($noteWorkspacesArray as $workspaceId) {
                 $option = 'notes_in_workspace_' . $workspaceId;
-                $notesInWorkspace = get_option($option) ?? [];
+                $notesInWorkspace = is_array(get_option($option)) ? get_option($option) : [];
                 if(is_array($notesInWorkspace)) {
                     $noteToRemove = array_search($postId ,$notesInWorkspace);
                     if (is_integer($noteToRemove)) {
-                        update_option($option, array_splice($notesInWorkspace, $noteToRemove, 1));
+                        update_option($option, array_diff($notesInWorkspace, [$postId]));
                     }
                 }
             }

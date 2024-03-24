@@ -1,31 +1,17 @@
 import React, { useEffect } from "react";
 import styled from "styled-components";
-import { darkGrey, darkYellow, grey as customGrey } from "../../colors";
+import { theme } from "../../colors";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../store";
 import { Link } from "react-router-dom";
 import ReactPaginate from "react-paginate";
 import { fetchWorkspaceData } from "../../slices/workspaces";
+import { setCurrentTerm } from "../../slices/workspaceInView";
 
-const StyledSideNav = styled.div`
-  position: fixed;
-  margin-top: 95px;
-  width: 15vw;
-  height: 100vh;
-  overflow: hidden;
-  background-color: ${darkGrey};
-  border-right: 1px solid ${customGrey};
-
-  @media only screen and (max-width: 660px) {
-    display: none;
-  }
-`;
 const StyledMenuContainer = styled.div`
-  padding: 0 5px;
-
   & ul {
+    padding: 0;
     list-style: none;
-    padding: 10px;
     & a {
       text-decoration: none;
       font-weight: bolder;
@@ -33,7 +19,7 @@ const StyledMenuContainer = styled.div`
     & li {
       transition: all;
       &:hover {
-        background-color: ${customGrey};
+        background-color: ${theme.pallete.grey};
         border-radius: 5px;
       }
       padding: 0.5rem;
@@ -41,7 +27,7 @@ const StyledMenuContainer = styled.div`
   }
 `;
 const StyledLi = styled.li`
-  background-color: ${darkYellow};
+  background-color: ${theme.pallete.darkYellow};
   border-radius: 5px;
   margin-bottom: 15px;
 `;
@@ -65,7 +51,7 @@ export const SideNav = () => {
   };
 
   return (
-    <StyledSideNav>
+    <>
       {!loading && !failed && (
         <StyledMenuContainer>
           {error instanceof Error || error ? (
@@ -73,7 +59,7 @@ export const SideNav = () => {
           ) : (
             <ul>
               <Link to={"/notepress/"}>
-                <StyledLi>All notes</StyledLi>
+                <StyledLi onClick={() => dispatch(setCurrentTerm(undefined))}>All notes</StyledLi>
               </Link>
               {data?.workspaces &&
                 data.workspaces.length > 0 &&
@@ -82,7 +68,7 @@ export const SideNav = () => {
                     to={`/notepress/workspace/${workspace.name}`}
                     key={workspace.id}
                   >
-                    <li>{workspace.name}</li>
+                    <li onClick={() => dispatch(setCurrentTerm(workspace.name))}>{workspace.name}</li>
                   </Link>
                 ))}
             </ul>
@@ -100,6 +86,6 @@ export const SideNav = () => {
           renderOnZeroPageCount={null}
         />
       )}
-    </StyledSideNav>
+    </>
   );
 };
