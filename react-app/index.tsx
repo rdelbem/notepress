@@ -44,6 +44,11 @@ const GlobalStyle = createGlobalStyle`
       position: sticky;
   }
 
+  table, th, td {
+    border: 1px solid ${theme.pallete.grey}!important;
+    border-collapse: collapse;
+}
+
   ul[role=navigation] {
     padding: 0;
     list-style: none;

@@ -26,7 +26,7 @@ class UpdateNotesIndexes extends \WP_CLI_Command
         $totalNotesCount = 0;
 
         if (empty ($workspaces)) {
-            \WP_CLI::error('No workspace found.');
+            class_exists('WP_CLI') && \WP_CLI::error('No workspace found.');
             return;
         }
 
@@ -48,10 +48,10 @@ class UpdateNotesIndexes extends \WP_CLI_Command
             $totalNotesCount += $count;
 
             update_option($workspace->name, $count);
-            \WP_CLI::success(sprintf('Workspace "%s" updated with %d notes.', $workspace->name, $count));
+            class_exists('WP_CLI') && \WP_CLI::success(sprintf('Workspace "%s" updated with %d notes.', $workspace->name, $count));
         }
 
         update_option('total_notes', $totalNotesCount);
-        \WP_CLI::success(sprintf('Total general notes count updated to %d.', $totalNotesCount));
+        class_exists('WP_CLI') && \WP_CLI::success(sprintf('Total general notes count updated to %d.', $totalNotesCount));
     }
 }

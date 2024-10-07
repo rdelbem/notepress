@@ -1,6 +1,4 @@
 <?php
-use Olmec\OlmecNotepress\WPCLI\UpdateNotesInWorkspacesOption;
-
 /**
  * Plugin Name: Notepress
  * Plugin URI: http://delbem.net/portfolio/notepress
@@ -23,20 +21,19 @@ require_once __DIR__ . '/vendor/autoload.php';
 
 use Olmec\OlmecNotepress\Activation;
 use Olmec\OlmecNotepress\CoreLoader;
+use Olmec\OlmecNotepress\WPCLI\NotepressCLI;
 use Olmec\OlmecNotepress\PostTypeAndTaxonomy;
-use Olmec\OlmecNotepress\WPCLI\NotesStatuses;
-use Olmec\OlmecNotepress\WPCLI\UpdateNotesIndexes;
+use function Olmec\OlmecNotepress\Util\registerUserLogin;
 
 register_activation_hook(__FILE__, fn() => Activation::run());
 
 if (!class_exists('CoreLoader')) {
-    add_action('init', fn() => new CoreLoader());
+    add_action('plugins_loaded', fn() => new CoreLoader());
     // create posttype and taxonomy
     new PostTypeAndTaxonomy(OLMEC_NOTEPRESS_POSTTYPE, OLMEC_NOTEPRESS_TAXONOMY);
-}
-
-if (defined('WP_CLI') && WP_CLI) {
-    \WP_CLI::add_command('notes-workspaces', NotesStatuses::class);
-    \WP_CLI::add_command('update-workspaces-notes-count', UpdateNotesIndexes::class);
-    \WP_CLI::add_command('update-notes-in-workspaces-option', UpdateNotesInWorkspacesOption::class);
+    // adds Notepress CLI commands
+    (new NotepressCLI())->createCommands();
+    // register the time a user logged in for the last time
+    // due to the nature of the "wp_login" hook, this cannot be called elsewhere
+    registerUserLogin();
 }

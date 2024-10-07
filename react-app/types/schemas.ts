@@ -1,3 +1,8 @@
+export type AuthHeader = {
+    jwt: JWT,
+    refreshToken: RefreshToken,
+};
+
 export type Author = {
     id: number,
     display_name: string,
@@ -6,7 +11,14 @@ export type Author = {
 
 export type CreateNoteInput = {
     title: string,
-    workspaces?: string,
+    workspaces: string,
+};
+
+export type JWT = {
+    iat: string,
+    iss: string,
+    exp: string,
+    uid: string,
 };
 
 export type Note = {
@@ -17,6 +29,11 @@ export type Note = {
     workspaces: string,
     created_at: string,
     updated_at: string,
+};
+
+export type RefreshToken = {
+    refresh_token: string,
+    exp: string,
 };
 
 export type User = {

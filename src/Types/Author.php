@@ -3,7 +3,7 @@
 namespace Olmec\OlmecNotepress\Types;
 
 final class Author {   
-     public int $id;
+    public int $id;
     public string $display_name;
     public string | null $avatar;
 
@@ -11,4 +11,5 @@ final class Author {
         $this->id = $id;
         $this->display_name = $display_name;
         $this->avatar = $avatar;
-    }}
+    }
+}

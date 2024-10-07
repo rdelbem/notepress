@@ -24,7 +24,7 @@ class NotesStatuses extends \WP_CLI_Command
     {
         $workspaces = get_terms(['taxonomy' => 'workspaces', 'hide_empty' => false]);
         if (empty ($workspaces)) {
-            \WP_CLI::error('No workspace found.');
+            class_exists('WP_CLI') && \WP_CLI::error('No workspace found.');
             return;
         }
 
@@ -40,7 +40,7 @@ class NotesStatuses extends \WP_CLI_Command
                 ],
             ];
             $query = new \WP_Query($args);
-            \WP_CLI::line(sprintf('Workspace "%s" has %d notes.', $workspace->name, $query->found_posts));
+            class_exists('WP_CLI') && \WP_CLI::line(sprintf('Workspace "%s" has %d notes.', $workspace->name, $query->found_posts));
         }
     }
 }

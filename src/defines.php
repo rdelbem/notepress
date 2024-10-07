@@ -14,3 +14,4 @@ define('OLMEC_NOTEPRESS_DOMAIN', 'olmec-notepress-domain');
 define('OLMEC_NOTEPRESS_REACT_APP_URL', plugin_dir_url(__DIR__) . 'assets/js/prod/App.js');
 define('OLMEC_NOTEPRESS_TAXONOMY_NAME', 'workspaces');
 define('OLMEC_NOTEPRESS_API_URL', home_url() . '/wp-json/' . OLMEC_NOTEPRESS_API_NAMESPACE);
+define('OLMEC_NOTEPRESS_ABSPATH', WP_PLUGIN_DIR . '/olmec-notepress');

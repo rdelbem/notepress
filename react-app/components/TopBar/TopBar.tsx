@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import { theme } from "../../colors";
 import { UserBox } from "../UserBox";
-import { api } from "../../slices/fetch";
+import { api } from "../../utils/fetch";
 import { PopUp } from "../PopUp";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";

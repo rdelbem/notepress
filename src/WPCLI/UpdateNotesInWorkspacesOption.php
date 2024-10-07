@@ -21,7 +21,7 @@ class UpdateNotesInWorkspacesOption extends \WP_CLI_Command {
         $workspaces = get_terms(['taxonomy' => 'workspaces', 'hide_empty' => false]);
 
         if (empty($workspaces)) {
-            \WP_CLI::error('No workspaces found.');
+            class_exists('WP_CLI') && \WP_CLI::error('No workspaces found.');
             return;
         }
 
@@ -45,7 +45,7 @@ class UpdateNotesInWorkspacesOption extends \WP_CLI_Command {
             $optionName = 'notes_in_workspace_' . $workspace->term_id;
 
             update_option($optionName, $noteIds);
-            \WP_CLI::success(sprintf('Workspace "%s" (ID: %d) option updated with serialized note IDs array.', $workspace->name, $workspace->term_id));
+            class_exists('WP_CLI') && \WP_CLI::success(sprintf('Workspace "%s" (ID: %d) option updated with serialized note IDs array.', $workspace->name, $workspace->term_id));
         }
     }
 }

@@ -15,6 +15,11 @@ final class CoreLoader
 
     function __construct()
     {
+        // the notepress owner is the one user that activated the plugin
+        // most likely the person that will use it
+        if ((int) get_option('notepress_owner') !== get_current_user_id()) {
+            return;
+        }
         // takes control over traditional wp routes
         $this->takeOverControl();
         // register our base template file for our custom page created on activation
@@ -40,10 +45,11 @@ final class CoreLoader
      */
     function takeOverControl(): void
     {
+        // WP_CLI won´t work if we take over control
         if (defined('WP_CLI') && WP_CLI) {
             return;
         }
-        
+
         if (!is_user_logged_in() && !is_login()) {
             wp_redirect(wp_login_url());
             exit;
@@ -82,10 +88,10 @@ final class CoreLoader
     function reactRoutingSupport(): void
     {
         // Forces WP to understand sub-routes
-        add_action('parse_request', function($wp) {
+        add_action('parse_request', function ($wp) {
             if (preg_match('#^notepress/(.+)#', $wp->request)) {
                 status_header(200);
-                include(get_index_template());
+                include (get_index_template());
                 exit;
             }
         });
@@ -150,6 +156,6 @@ final class CoreLoader
 
     function removeAdminNavbar(): void
     {
-        add_filter('show_admin_bar', fn () => is_admin());
+        add_filter('show_admin_bar', fn() => is_admin());
     }
 }

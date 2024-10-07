@@ -82,7 +82,7 @@ export const SideNav = () => {
           previousLabel="<"
           onPageChange={handlePageClick}
           pageRangeDisplayed={4}
-          pageCount={data?.total / 10}
+          pageCount={Math.ceil(data?.total / 10)}
           renderOnZeroPageCount={null}
         />
       )}

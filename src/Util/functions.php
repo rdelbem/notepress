@@ -9,6 +9,8 @@ if (!defined('ABSPATH')) {
 /**
  * Add here functions that are not context specific and
  * would not perticularly fit to a class or a trait
+ * 
+ * NOTE: use this space with caution and moderation
  */
 
 /**
@@ -86,4 +88,21 @@ function getNoteWorkspaces(\WP_Post $post): array
     }
 
     return $workspaces;
+}
+
+/**
+ * Registers the login moment of a user in the WordPress database.
+ *
+ * This function adds a hook to 'wp_login' that is triggered whenever
+ * a user successfully logs in. Upon being triggered, the hook calls an
+ * anonymous function that updates an option in the database to record the current
+ * login time of the user. The option is named with the user's ID followed by '_logged_at',
+ * ensuring that the login moment registration is unique for each user.
+ *
+ * @return void
+ */
+function registerUserLogin(): void {
+    add_action('wp_login', function(string $userLogin, \WP_User $user): void {
+        update_option("{$user->ID}_logged_at", current_time('timestamp'));
+    }, 10, 2);
 }

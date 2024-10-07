@@ -6,6 +6,7 @@ import { NotesListView } from "./components/NotesListView/NotesListView";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Editor } from "./components/Editor";
 import { TopBar } from "./components/TopBar";
+import JwtListener from "./components/JWT/JwtListener";
 
 const AppContainer = styled.div`
   border: 1px solid ${theme.pallete.grey};
@@ -69,6 +70,7 @@ export const App = () => {
   return (
     <BrowserRouter>
       <AppContainer>
+        <JwtListener />
         <TopBarNav>
           <TopBar />
         </TopBarNav>

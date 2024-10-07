@@ -13,11 +13,13 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+use Olmec\OlmecNotepress\Auth;
 use Olmec\OlmecNotepress\Api\Notes;
 use Olmec\OlmecNotepress\Api\Route;
 use Olmec\OlmecNotepress\Api\Workspaces;
 
-$route = new Route();
+$auth = new Auth();
+$route = new Route($auth);
 $notes = new Notes();
 $workspaces = new Workspaces();
 
@@ -31,7 +33,7 @@ $route->create('GET', '/notes', fn(\WP_REST_Request $request) => $notes->getAll(
 $route->create('GET', '/notes/:id', fn(\WP_REST_Request $params) => $notes->getById((int) $params['id']));
 $route->create('POST', '/notes', fn(\WP_REST_Request $params) => $notes->create($params));
 $route->create('PATCH', '/notes/:id', fn(\WP_REST_Request $params) => $notes->update($params));
-$route->create('DELETE', '/notes/:id', fn(\WP_REST_Request $params) => $notes->delete((int) $params->get_param('id')));
+$route->create('DELETE', '/notes/:id', fn(\WP_REST_Request $params) => $notes->delete((int) $params->get_param(key: 'id')));
 $route->create('GET', '/notes/search', fn(\WP_REST_Request $request) => $notes->search($request->get_param('query'), (int) $request->get_param('page') ?? 1));
 $route->create('GET', '/notes/workspace', fn(\WP_REST_Request $params) => $notes->getNotesByWorkspace($params->get_param('term'), (int) $params->get_param('page') ?? 1));
 
@@ -42,3 +44,31 @@ $route->create('POST', '/workspaces', fn(\WP_REST_Request $params) => $workspace
 $route->create('PATCH', '/workspaces/:id', fn(\WP_REST_Request $params) => $workspaces->update($params));
 $route->create('DELETE', '/workspaces/:id', fn(\WP_REST_Request $params) => $workspaces->delete((int) $params['id']));
 $route->create('GET', '/workspaces/search', fn(\WP_REST_Request $request) => $workspaces->search($request->get_param('query'), $request->get_param('page') ?? 1));
+
+// renew JWT
+$route->create('GET', '/send-jwt', function (\WP_REST_Request $request) {    
+    $userId = $request->get_param('userId');
+
+    if ($userId) {
+        $user = get_user_by('ID', $userId);
+        if ($user instanceof \WP_User) {
+            $auth = new Auth();
+            if(!$auth->validateRefreshToken($user)){
+                return;
+            }
+            header('Content-Type: text/event-stream');
+            header('Cache-Control: no-cache');
+            header('Connection: keep-alive');
+            
+            $auth->createSession($user);
+
+            echo "data: " . json_encode(['jwt' => $auth->getEncodedjWT()]) . "\n\n";
+            flush();
+
+        } else {
+            return new \WP_Error('invalid_user', __('Invalid user.'), ['status' => 404]);
+        }
+    } else {
+        return new \WP_Error('rest_user_not_logged_in', __('User not logged in.'), ['status' => 401]);
+    }
+}, true);

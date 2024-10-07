@@ -1,3 +1,5 @@
+import Cookies from "js-cookie"
+
 type ActionType = {
   GET: "GET";
   POST: "POST";
@@ -23,6 +25,7 @@ const fetchWrapper = async <T>(
       headers: {
         "Content-Type": "application/json",
         "X-WP-Nonce": window.nonce,
+        "Authorization": Cookies.get('jwt') || '',
       },
       body: body ? JSON.stringify(body) : undefined,
     });

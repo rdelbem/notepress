@@ -94,7 +94,7 @@ export const NotesListView = () => {
           previousLabel="<"
           onPageChange={handlePageClick}
           pageRangeDisplayed={4}
-          pageCount={data?.total / 9}
+          pageCount={Math.ceil(data?.total / 9)}
           renderOnZeroPageCount={null}
         />
       ) : null}

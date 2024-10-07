@@ -1,6 +1,6 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { Note } from "../types/schemas";
-import { api } from "./fetch";
+import { api } from "../utils/fetch";
 import { State } from "./createSliceWrapper";
 import {
   AnyAsyncThunk,

@@ -1,6 +1,7 @@
 <?php
 
 namespace Olmec\OlmecNotepress\Api;
+use Olmec\OlmecNotepress\AuthInterface;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -11,6 +12,12 @@ use \WP_REST_Request;
 
 final class Route
 {
+    private AuthInterface $auth;
+
+    // TODO: add strategy pattern, so we are not required to have a auth class, and fallback to nonce
+    function __construct(AuthInterface $authInterface) {
+        $this->auth = $authInterface;
+    }
 
     /**
      * Performes a security check on the incoming request header
@@ -22,15 +29,12 @@ final class Route
      */
     public function securityCheck(WP_REST_Request $request)
     {
-        $headers = $request->get_headers();
-        $nonce = $headers['x_wp_nonce'][0] ?? null;
-        $isValidNonce = $nonce ? wp_verify_nonce($nonce, 'wp_rest') : false;
-
-        if ($isValidNonce) {
-            return current_user_can('publish_posts');
-        }
-
-        return false;
+        // Intercept auth header
+        // check refresh token exp
+        // regenerate refresh token and session
+        // add a method that changes the header response to contain the new values
+        // create a session provider on the client to manage the cookies
+        return $this->auth->validateJwt($request);
     }
 
     /**

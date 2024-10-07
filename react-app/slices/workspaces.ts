@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { Workspace } from "../types/schemas";
-import { api } from "./fetch";
+import { api } from "../utils/fetch";
 import { State } from "./createSliceWrapper";
 import {
   AnyAsyncThunk,

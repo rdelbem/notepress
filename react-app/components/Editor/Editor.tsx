@@ -19,10 +19,9 @@ import {
   MDXEditorMethods,
   Button,
   imagePlugin,
-  InsertImage,
 } from "@mdxeditor/editor";
 import { useParams } from "react-router-dom";
-import { api, response } from "../../slices/fetch";
+import { api, response } from "../../utils/fetch";
 import LoadingBar from "react-top-loading-bar";
 import {  theme } from "../../colors";
 import { Note } from "../../types";
@@ -41,7 +40,6 @@ export const Editor = () => {
         if(response && response.data) setNote(response);
       } catch (error) {
         setProgress(100);
-        console.error("Erro ao buscar nota:", error);
       } finally {
         setProgress(100);
       }
@@ -89,7 +87,6 @@ export const Editor = () => {
                     <CreateLink />
                     <InsertTable />
                     <InsertThematicBreak />
-                    <InsertImage />
                     <Button onClick={() => handleUpdate(ref.current?.getMarkdown())} style={{
                       border: `1px solid ${theme.pallete.darkYellow}`
                     }}>

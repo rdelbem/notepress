@@ -220,14 +220,6 @@ final class Notes
     }
 
     public function search(string $keyWord, int $pageNumber = 1) {
-        $cacheKey = 'notes_search_' . md5(trim($keyWord));
-        $cachedNotes = get_transient($cacheKey);
-
-        if((bool) $cachedNotes){
-            wp_send_json($cachedNotes);
-            exit;
-        }
-
         $args = [
             'post_type' => 'notes',
             'post_status' => 'publish',
@@ -273,8 +265,6 @@ final class Notes
                 get_the_modified_date('c')
             );
         }
-
-        set_transient($cacheKey, $notesArray, 60);
 
         wp_send_json($notesArray);
         wp_reset_postdata();

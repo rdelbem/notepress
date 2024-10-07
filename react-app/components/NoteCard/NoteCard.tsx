@@ -7,7 +7,7 @@ import { Link, useParams } from "react-router-dom";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { IoTrashBin } from "react-icons/io5";
-import { api } from "../../slices/fetch";
+import { api } from "../../utils/fetch";
 import { PopUp } from "../PopUp/PopUp";
 
 const StyledLink = styled(Link)`

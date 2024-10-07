@@ -14,6 +14,7 @@
     "date-fns": "^3.3.1",
     "dateformat": "5.0.3",
     "framer-motion": "^10.18.0",
+    "js-cookie": "^3.0.5",
     "npm-run-all": "4.1.5",
     "react": "18.2.0",
     "react-dom": "18.2.0",
@@ -38,6 +39,7 @@
     "@babel/preset-env": "7.22.5",
     "@babel/preset-react": "^7.22.5",
     "@babel/preset-typescript": "^7.23.3",
+    "@types/js-cookie": "^3.0.6",
     "@types/react": "^18.2.48",
     "@types/react-dom": "^18.2.18",
     "@types/react-transition-group": "^4.4.10",
@@ -52,6 +54,7 @@
     "browser-sync-webpack-plugin": "2.3.0",
     "clean-webpack-plugin": "4.0.0",
     "cross-env": "7.0.3",
+    "crypto": "^1.0.1",
     "css-loader": "6.8.1",
     "ncp": "^2.0.0",
     "rimraf": "^5.0.5",
@@ -72,7 +75,8 @@
     "wpcli": "cd ../.. && docker-compose run --rm wpcli wp",
     "count:notes": "npm run wpcli notes-workspaces count",
     "update:indexes": "npm run wpcli update-workspaces-notes-count",
-    "update:notes:in:workspaces": "npm run wpcli update-notes-in-workspaces-option"
+    "update:notes:in:workspaces": "npm run wpcli update-notes-in-workspaces-option",
+    "generate:env": "node generate-env.js"
   },
   "author": "",
   "license": "ISC"
