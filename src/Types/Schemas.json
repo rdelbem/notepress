@@ -1,0 +1,43 @@
+{
+    "AuthHeader": {
+        "jwt": "JWT",
+        "refreshToken": "RefreshToken"
+    },
+    "Author": {
+        "id": "number",
+        "display_name": "string",
+        "avatar": "string"
+    },
+    "CreateNoteInput": {
+        "title": "string",
+        "workspaces": "string"
+    },
+    "JWT": {
+        "iat": "string",
+        "iss": "string",
+        "exp": "string",
+        "uid": "string"
+    },
+    "Note": {
+        "title": "string",
+        "id": "number",
+        "author": "Author",
+        "content": "string",
+        "workspaces": "string",
+        "created_at": "string",
+        "updated_at": "string"
+    },
+    "RefreshToken": {
+        "refresh_token": "string",
+        "exp": "string"
+    },
+    "User": {
+        "id": "number",
+        "display_name": "string",
+        "avatar": "string"
+    },
+    "Workspace": {
+        "id": "number",
+        "name": "string"
+    }
+}

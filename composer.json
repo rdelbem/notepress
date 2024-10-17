@@ -1,0 +1,37 @@
+{
+    "name": "olmec/olmec-notepress",
+    "description": "just a wp plugin",
+    "type": "library",
+    "license": "gpl",
+    "autoload": {
+        "psr-4": {
+            "Olmec\\OlmecNotepress\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "rdelbem",
+            "email": "rodrigodelbem@gmail.com"
+        }
+    ],
+    "scripts": {
+        "generate:contracts": "php src/Types/generate-contracts.php",
+        "test": "docker compose exec php vendor/bin/codecept run wpunit"
+    },
+    "minimum-stability": "alpha",
+    "require": {
+        "firebase/php-jwt": "6.10",
+        "vlucas/phpdotenv": "^5.6"
+    },
+    "config": {
+        "bin-compat": "full"
+    },
+    "require-dev": {
+        "codeception/codeception": "^5.1",
+        "lucatume/wp-browser": "^4.3",
+        "10up/wp_mock": "^1.0",
+        "codeception/module-asserts": "^3.0",
+        "codeception/module-phpbrowser": "^3.0",
+        "brain/monkey": "^2.6"
+    }
+}
