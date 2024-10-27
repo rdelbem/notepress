@@ -1,14 +1,14 @@
 <?php
 /**
- * Plugin Name: Notepress
+ * Plugin Name: Notepress OLMC
  * Plugin URI: http://delbem.net/portfolio/notepress
  * Description: Transforms your WP instance in a note taking PWA app
  * Version: 1.0.0
  * Author: Olmec, Rodrigo Vieira Del Bem
  * Author URI: http://delbem.net/portfolio
  * License: GPLv2 or later
- * Text Domain: olmec-notepress-domain
- * Domain Path: languages
+ * Text Domain: notepress-olmc
+ * Domain Path: /languages
  */
 
 // Prevent direct file access

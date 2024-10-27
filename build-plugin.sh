@@ -33,6 +33,7 @@ rsync -av . "$BUILD_DIR" --exclude "node_modules" \
   --exclude "docker" \
   --exclude "tests" \
   --exclude ".babelrc" \
+  --exclude ".env" \
   --exclude ".env.testing" \
   --exclude ".gitignore" \
   --exclude "codeception.yml" \
