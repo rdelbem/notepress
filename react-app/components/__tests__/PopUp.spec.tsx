@@ -1,7 +1,7 @@
 import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
-import { PopUp } from "../PopUp";
+import PopUp from "../PopUp";
 
 describe("PopUp Component", () => {
   const childText = "This is a modal content";

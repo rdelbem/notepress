@@ -25,6 +25,8 @@ const StyledMenuContainer = styled.div`
       padding: 0.5rem;
     }
   }
+  overflow-y: auto;
+  max-height: calc(100vh - 94px);
 `;
 const StyledLi = styled.li`
   background-color: ${theme.pallete.darkYellow};
@@ -32,7 +34,11 @@ const StyledLi = styled.li`
   margin-bottom: 15px;
 `;
 
-export const SideNav = () => {
+interface SideNavProps {
+  onLinkClick: () => void;
+}
+
+export const SideNav = ({ onLinkClick }: SideNavProps) => {
   const dispatch = useDispatch<AppDispatch>();
   const { data, status, error } = useSelector(
     (state: RootState) => state.workspaces
@@ -66,25 +72,26 @@ export const SideNav = () => {
     <>
       {!loading && (
         <StyledMenuContainer>
-          <ul>
-            <Link to={"/notepress/"}>
-              <StyledLi onClick={() => dispatch(setCurrentTerm(undefined))}>
-                All notes
-              </StyledLi>
-            </Link>
-            {data?.workspaces &&
-              data.workspaces.map((workspace) => (
-                <Link
-                  to={`/notepress/workspace/${workspace.name}`}
-                  key={workspace.id}
-                >
-                  <li onClick={() => dispatch(setCurrentTerm(workspace.name))}>
-                    {workspace.name}
-                  </li>
-                </Link>
-              ))}
-          </ul>
-        </StyledMenuContainer>
+        <ul>
+          <Link to={"/notepress/"} onClick={onLinkClick}>
+            <StyledLi onClick={() => dispatch(setCurrentTerm(undefined))}>
+              All notes
+            </StyledLi>
+          </Link>
+          {data?.workspaces &&
+            data.workspaces.map((workspace) => (
+              <Link
+                to={`/notepress/workspace/${workspace.name}`}
+                key={workspace.id}
+                onClick={onLinkClick}
+              >
+                <li onClick={() => dispatch(setCurrentTerm(workspace.name))}>
+                  {workspace.name}
+                </li>
+              </Link>
+            ))}
+        </ul>
+      </StyledMenuContainer>
       )}
       {data?.total && data.total > 10 ? (
         <ReactPaginate

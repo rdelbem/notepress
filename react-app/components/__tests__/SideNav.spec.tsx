@@ -50,7 +50,7 @@ describe("SideNav Component", () => {
     render(
       <Provider store={store}>
         <BrowserRouter>
-          <SideNav />
+          <SideNav onLinkClick={() => {}} />
         </BrowserRouter>
       </Provider>
     );
@@ -62,7 +62,7 @@ describe("SideNav Component", () => {
     render(
       <Provider store={store}>
         <BrowserRouter>
-          <SideNav />
+          <SideNav onLinkClick={() => {}} />
         </BrowserRouter>
       </Provider>
     );
@@ -80,7 +80,7 @@ describe("SideNav Component", () => {
     render(
       <Provider store={store}>
         <BrowserRouter>
-          <SideNav />
+          <SideNav onLinkClick={() => {}} />
         </BrowserRouter>
       </Provider>
     );
@@ -96,7 +96,7 @@ describe("SideNav Component", () => {
     render(
       <Provider store={store}>
         <BrowserRouter>
-          <SideNav />
+          <SideNav onLinkClick={() => {}} />
         </BrowserRouter>
       </Provider>
     );
@@ -108,7 +108,7 @@ describe("SideNav Component", () => {
     render(
       <Provider store={store}>
         <BrowserRouter>
-          <SideNav />
+          <SideNav onLinkClick={() => {}} />
         </BrowserRouter>
       </Provider>
     );
@@ -143,7 +143,7 @@ describe("SideNav Component", () => {
     render(
       <Provider store={store}>
         <BrowserRouter>
-          <SideNav />
+          <SideNav onLinkClick={() => {}} />
         </BrowserRouter>
       </Provider>
     );

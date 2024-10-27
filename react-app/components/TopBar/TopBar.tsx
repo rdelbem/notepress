@@ -1,9 +1,8 @@
-import React, { useState } from "react";
+import React, { lazy, Suspense, useState } from "react";
 import styled from "styled-components";
 import { theme } from "../../colors";
 import { UserBox } from "../UserBox";
 import { api } from "../../utils/fetch";
-import { PopUp } from "../PopUp";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -13,6 +12,8 @@ import { addNote } from "../../slices/notes";
 import { RootState } from "../../store";
 import LoadingBar from "react-top-loading-bar";
 import { addWorkspace } from "../../slices/workspaces";
+
+const PopUp = lazy(() => import("../PopUp"));
 
 const AddNoteButton = styled.button`
   background: ${theme.pallete.magenta};
@@ -30,6 +31,10 @@ const AddNoteButton = styled.button`
 `;
 const UserBoxContainer = styled.div`
   margin: 0 1rem;
+
+  @media only screen and (max-width: 660px) {
+    display: none;
+  }
 `;
 const PopUpButton = styled.button`
   background: ${theme.pallete.darkYellow};
@@ -74,14 +79,63 @@ const LabelSmall = styled.small`
   font-weight: 700;
 `;
 
+interface HamburgerIconProps {
+  isOpen: boolean;
+}
+
+const HamburgerIcon = styled.div<HamburgerIconProps>`
+  display: none;
+  cursor: pointer;
+  width: 30px;
+  height: 22px;
+  position: relative;
+  margin-left: 1rem;
+
+  @media only screen and (max-width: 660px) {
+    display: block;
+  }
+
+  & span {
+    background: ${theme.pallete.magenta};
+    position: absolute;
+    height: 4px;
+    width: 100%;
+    border-radius: 2px;
+    left: 0;
+    transition: 0.25s ease-in-out;
+  }
+
+  ${(props) => `
+    & span:nth-child(1) {
+      top: ${props.isOpen ? "9px" : "0"};
+      transform: ${props.isOpen ? "rotate(45deg)" : "rotate(0)"};
+    }
+
+    & span:nth-child(2) {
+      top: 9px;
+      opacity: ${props.isOpen ? "0" : "1"};
+    }
+
+    & span:nth-child(3) {
+      top: ${props.isOpen ? "9px" : "18px"};
+      transform: ${props.isOpen ? "rotate(-45deg)" : "rotate(0)"};
+    }
+  `}
+`;
+
 const createNoteSchema = yup.object().shape({
   title: yup.string().required(),
   workspaces: yup.string().optional(),
 });
 
-export const TopBar = () => {
+interface TopBarProps {
+  onMenuClick: () => void;
+  isSideNavOpen: boolean;
+}
+
+export const TopBar = ({ onMenuClick, isSideNavOpen }: TopBarProps) => {
   const [showModal, setShowModal] = useState(false);
-  const [progress, setProgress] = useState(0)
+  const [progress, setProgress] = useState(0);
   const term = useSelector(
     (state: RootState) => state.workspaceInView.currentTerm
   );
@@ -98,26 +152,6 @@ export const TopBar = () => {
     },
   });
 
-  // const onSubmit = async (inputUpdate: Omit<CreateNoteInput, 'workspaces'> & { workspaces?: string }) => {
-  //   setShowModal(false);
-  //   reset();
-  //   try {
-  //     setProgress(30);
-  //     const updatedInput = {
-  //       ...inputUpdate,
-  //       workspaces: inputUpdate.workspaces ? inputUpdate.workspaces : term || 'default',
-  //     };
-  //     const response = await api.create<Note>("notes", updatedInput);
-  //     if (response.data) {
-  //       dispatch(addNote(response.data));
-  //     }
-  //   } catch (error) {
-  //     console.error("Error:", error);
-  //   } finally {
-  //     setProgress(100);
-  //   }
-  // };
-
   const onSubmit = async (
     inputUpdate: Omit<CreateNoteInput, "workspaces"> & { workspaces?: string }
   ) => {
@@ -128,7 +162,7 @@ export const TopBar = () => {
       const response = await api.create<Note>("notes", inputUpdate);
       if (response.data) {
         dispatch(addNote(response.data));
-  
+
         // Handle workspaces
         if (response.data.workspaces) {
           const workspaceStrings = response.data.workspaces.split(",");
@@ -159,52 +193,65 @@ export const TopBar = () => {
         progress={progress}
         onLoaderFinished={() => setProgress(0)}
       />
+      <HamburgerIcon
+        onClick={onMenuClick}
+        isOpen={isSideNavOpen}
+        aria-label="Toggle menu"
+        aria-expanded={isSideNavOpen}
+        role="button"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </HamburgerIcon>
       <UserBoxContainer>
         <UserBox />
       </UserBoxContainer>
       <AddNoteButton onClick={() => setShowModal(true)}>Add Note</AddNoteButton>
-      {showModal ? (
-        <PopUp inProp={showModal}>
-          <>
-            <p>Create note</p>
-            <form onSubmit={handleSubmit((input) => onSubmit(input))}>
-              <InputContainer>
-                <label htmlFor="title">
-                  Note title *
-                  {errors.title && (
-                    <LabelSmall color="red"> title is required</LabelSmall>
-                  )}
-                </label>
-                <input type="text" id="title" {...register("title")} />
-              </InputContainer>
-              <InputContainer>
-                <label htmlFor="workspace">
-                  Workspace, use commas to separate multiple workspaces
-                </label>
-                <input
-                  type="text"
-                  id="workspace"
-                  {...register("workspaces")}
-                  defaultValue={term}
-                />
-              </InputContainer>
-              <PopUpButton type="submit">Create</PopUpButton>
-              <PopUpButton
-                onClick={() => {
-                  setShowModal(false);
-                  reset();
-                }}
-                style={{
-                  backgroundColor: theme.pallete.darkGrey,
-                  border: "1px solid white",
-                }}
-              >
-                Dismiss
-              </PopUpButton>
-            </form>
-          </>
-        </PopUp>
-      ) : null}
+      {showModal && (
+        <Suspense fallback={<></>}>
+          <PopUp inProp={showModal}>
+            <>
+              <p>Create note</p>
+              <form onSubmit={handleSubmit((input) => onSubmit(input))}>
+                <InputContainer>
+                  <label htmlFor="title">
+                    Note title *
+                    {errors.title && (
+                      <LabelSmall color="red"> title is required</LabelSmall>
+                    )}
+                  </label>
+                  <input type="text" id="title" {...register("title")} />
+                </InputContainer>
+                <InputContainer>
+                  <label htmlFor="workspace">
+                    Workspace, use commas to separate multiple workspaces
+                  </label>
+                  <input
+                    type="text"
+                    id="workspace"
+                    {...register("workspaces")}
+                    defaultValue={term}
+                  />
+                </InputContainer>
+                <PopUpButton type="submit">Create</PopUpButton>
+                <PopUpButton
+                  onClick={() => {
+                    setShowModal(false);
+                    reset();
+                  }}
+                  style={{
+                    backgroundColor: theme.pallete.darkGrey,
+                    border: "1px solid white",
+                  }}
+                >
+                  Dismiss
+                </PopUpButton>
+              </form>
+            </>
+          </PopUp>
+        </Suspense>
+      )}
     </>
   );
 };

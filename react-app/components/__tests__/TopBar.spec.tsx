@@ -53,7 +53,7 @@ describe("TopBar Component", () => {
     render(
       <Provider store={store}>
         <BrowserRouter>
-          <TopBar />
+          <TopBar isSideNavOpen={false} onMenuClick={() => {}} />
         </BrowserRouter>
       </Provider>
     );
@@ -66,7 +66,7 @@ describe("TopBar Component", () => {
     render(
       <Provider store={store}>
         <BrowserRouter>
-          <TopBar />
+          <TopBar isSideNavOpen={false} onMenuClick={() => {}} />
         </BrowserRouter>
       </Provider>
     );
@@ -83,7 +83,7 @@ describe("TopBar Component", () => {
     render(
       <Provider store={store}>
         <BrowserRouter>
-          <TopBar />
+          <TopBar isSideNavOpen={false} onMenuClick={() => {}} />
         </BrowserRouter>
       </Provider>
     );
@@ -122,7 +122,7 @@ describe("TopBar Component", () => {
     render(
       <Provider store={store}>
         <BrowserRouter>
-          <TopBar />
+          <TopBar isSideNavOpen={false} onMenuClick={() => {}} />
         </BrowserRouter>
       </Provider>
     );
