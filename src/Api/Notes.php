@@ -291,7 +291,16 @@ class Notes
             $this->sendJsonResponse('No posts found');
             exit;
         }
-
+    
+        $cacheKey = "notes_by_workspace_{$workspace}_page_{$pageNumber}";
+        $cachedNotes = get_transient($cacheKey);
+    
+        if ($cachedNotes !== false) {
+            // cached response if available
+            $this->sendJsonResponse($cachedNotes);
+            exit;
+        }
+    
         $args = [
             'post_type' => 'notes',
             'posts_per_page' => self::NOTES_PER_PAGE,
@@ -304,22 +313,22 @@ class Notes
                 ]
             ]
         ];
-
+    
         $notesQuery = new \WP_Query($args);
         $notesArray = [];
-
+    
         if($notesQuery->have_posts()){
             while ($notesQuery->have_posts()) {
                 global $post;
                 $notesQuery->the_post();
-
+    
                 $authorAvatar = get_avatar_url(get_the_author_meta('ID'), ['size' => 450]);
                 $author = new Author(
                     (int) get_the_author_meta('ID'),
                     get_the_author_meta('display_name'),
                     $authorAvatar ? $authorAvatar : null
                 );
-
+    
                 $workspacesAsWpTerms = get_the_terms($post, 'workspaces');
                 $workspacesArray = [];
                 if(!is_wp_error($workspacesAsWpTerms) && is_array($workspacesAsWpTerms)){
@@ -327,7 +336,7 @@ class Notes
                         $workspacesArray[] = $workspace->name . ':' . $workspace->term_id;
                     }
                 }
-
+    
                 $notesArray[] = new Note(
                     get_the_title(), 
                     get_the_ID(), 
@@ -338,19 +347,23 @@ class Notes
                     get_the_modified_date('c')
                 );
             }
-
+    
             $createResponse = [
-                'total' => getNotesCount($workspace->name),
+                'total' => getNotesCount($workspace),
                 'pageNumber' => $pageNumber,
                 'notes' => $notesArray 
             ];
-
+    
+            // Cache the response for future use
+            set_transient($cacheKey, $createResponse, HOUR_IN_SECONDS);
+    
             $this->sendJsonResponse($createResponse);
             wp_reset_postdata();
             exit;
         }
-
+    
         $this->sendJsonResponse('No posts found');
         exit;
     }
+    
 }

@@ -28,9 +28,9 @@ $userAvatarUrl = get_avatar_url($userObject->ID) !== 0 ? get_avatar_url($userObj
 <div id="root"></div>
 
 <script>
-    window.nonce = "<?php echo wp_create_nonce('wp_rest'); ?>";
-    window.api_url = "<?php echo OLMEC_NOTEPRESS_API_URL; ?>";
-    window.user = <?php echo json_encode(new User((int) $userObject->data->ID, $userObject->data->display_name ?? $userObject->data->first_name ?? 'Unkown user name', $userAvatarUrl)); ?>;
+    window.nonce = "<?php echo esc_js(wp_create_nonce('wp_rest')); ?>";
+    window.api_url = "<?php echo esc_url(OLMEC_NOTEPRESS_API_URL); ?>";
+    window.user = <?php echo wp_json_encode(new User((int) $userObject->data->ID, $userObject->data->display_name ?? $userObject->data->first_name ?? 'Unknown user name', esc_url($userAvatarUrl))); ?>;
 </script>
 
 <?php wp_footer() ?>
