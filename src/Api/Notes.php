@@ -349,7 +349,7 @@ class Notes
             }
     
             $createResponse = [
-                'total' => getNotesCount($workspace),
+                'total' => getNotesCount(is_string($workspace) ? $workspace : $workspace->slug),
                 'pageNumber' => $pageNumber,
                 'notes' => $notesArray 
             ];
