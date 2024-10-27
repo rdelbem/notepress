@@ -16,7 +16,7 @@
     ],
     "scripts": {
         "generate:contracts": "php src/Types/generate-contracts.php",
-        "test": "docker compose exec php vendor/bin/codecept run"
+        "test": "docker compose exec php vendor/bin/codecept run wpunit"
     },
     "minimum-stability": "alpha",
     "require": {
