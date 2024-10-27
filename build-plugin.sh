@@ -17,7 +17,7 @@ if [ -f "package.json" ]; then
   echo "Installing npm dependencies and building assets..."
   npm install
   npm run build || echo "No build script found. Skipping asset build."
-  rm -rf node_modules  # Remove node_modules after build
+  rm -rf node_modules
 fi
 
 echo "Creating build directory..."
@@ -48,12 +48,15 @@ rsync -av . "$BUILD_DIR" --exclude "node_modules" \
   --exclude "webpack.config.js" \
   --exclude "wp-config.php" \
   --exclude "src/Types/generate-contracts.php" \
-  --exclude "src/WPCLI"  # Corrected exclusion for WPCLI folder
+  --exclude "src/WPCLI" 
 
 if [ ! -d "$BUILD_DIR" ]; then
   echo "Error: Build directory was not created. Exiting."
   exit 1
 fi
+
+echo "Removing unnecessary files from build directory..."
+rm -f "$BUILD_DIR/build-plugin.sh"
 
 cd "$BUILD_DIR" || exit
 
@@ -64,5 +67,8 @@ cd ..
 
 echo "Cleaning up build directory..."
 rm -rf "$BUILD_DIR"
+
+echo "Re-installing Composer with all dependencies..."
+composer install
 
 echo "Build complete! Plugin zip file: $ZIP_NAME"
