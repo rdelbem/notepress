@@ -49,7 +49,7 @@ class Notes
                 $workspacesArray = [];
                 if(!is_wp_error($workspacesAsWpTerms) && is_array($workspacesAsWpTerms)){
                     foreach ($workspacesAsWpTerms as $workspace) {
-                        $workspacesArray[] = $workspace->name;
+                        $workspacesArray[] = $workspace->name . ':' . $workspace->term_id;
                     }
                 }
 
@@ -87,7 +87,7 @@ class Notes
         $workspacesArray = [];
         if(!is_wp_error($workspacesAsWpTerms) && is_array($workspacesAsWpTerms)){
             foreach ($workspacesAsWpTerms as $workspace) {
-                $workspacesArray[] = $workspace->name;
+                $workspacesArray[] = $workspace->name . ':' . $workspace->term_id;
             }
         }
         if ($note && $note->post_type == 'notes') {
@@ -172,7 +172,7 @@ class Notes
         $workspacesArray = [];
         if(!is_wp_error($workspacesAsWpTerms) && is_array($workspacesAsWpTerms)){
             foreach ($workspacesAsWpTerms as $workspace) {
-                $workspacesArray[] = $workspace->name;
+                $workspacesArray[] = $workspace->name . ':' . $workspace->term_id;
             }
         }
 
@@ -266,7 +266,7 @@ class Notes
             $workspacesArray = [];
             if(!is_wp_error($workspacesAsWpTerms) && is_array($workspacesAsWpTerms)){
                 foreach ($workspacesAsWpTerms as $workspace) {
-                    $workspacesArray[] = $workspace->name;
+                    $workspacesArray[] = $workspace->name . ':' . $workspace->term_id;
                 }
             }
 
@@ -324,7 +324,7 @@ class Notes
                 $workspacesArray = [];
                 if(!is_wp_error($workspacesAsWpTerms) && is_array($workspacesAsWpTerms)){
                     foreach ($workspacesAsWpTerms as $workspace) {
-                        $workspacesArray[] = $workspace->name;
+                        $workspacesArray[] = $workspace->name . ':' . $workspace->term_id;
                     }
                 }
 

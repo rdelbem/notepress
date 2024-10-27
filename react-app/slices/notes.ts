@@ -2,10 +2,16 @@ import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { Note } from "../types/schemas";
 import { api } from "../utils/fetch";
 import { State } from "./createSliceWrapper";
-import {
-  AnyAsyncThunk,
-  RejectedWithValueActionFromAsyncThunk,
-} from "@reduxjs/toolkit/dist/matchers";
+import { AsyncThunk, UnknownAction } from '@reduxjs/toolkit';
+
+type AnyAsyncThunk = AsyncThunk<any, any, any>;
+
+type RejectedWithValueActionFromAsyncThunk<Thunk extends AnyAsyncThunk> =
+  ReturnType<Thunk> extends Promise<infer Result>
+    ? Result extends { error: { message: string } }
+      ? Result
+      : never
+    : never;
 
 type FetchNotesByCategoryArg = {
   category: string;
@@ -20,18 +26,13 @@ type NotesResponse =
     }
   | undefined;
 
-export const fetchNotesByCategory = createAsyncThunk<
+  export const fetchNotesByCategory = createAsyncThunk<
   NotesResponse,
   FetchNotesByCategoryArg,
   { rejectValue: string }
 >(
   "notes/fetchNotesByCategory",
-  async (
-    { category, pageNumber },
-    { rejectWithValue }
-  ): Promise<
-    NotesResponse | RejectedWithValueActionFromAsyncThunk<AnyAsyncThunk>
-  > => {
+  async ({ category, pageNumber }, { rejectWithValue }) => {
     try {
       const page = pageNumber === 0 ? 1 : pageNumber;
       const endpoint =
@@ -39,10 +40,7 @@ export const fetchNotesByCategory = createAsyncThunk<
           ? `notes/workspace?term=${category}&page=${page}`
           : `notes?page=${page}`;
       const { data } = await api.get<NotesResponse>(endpoint);
-      if (data) {
-        return data;
-      }
-      return [];
+      return data;
     } catch (error) {
       return rejectWithValue("An error occurred");
     }
@@ -70,9 +68,15 @@ const slice = createSlice({
     addNote: (state, action: PayloadAction<Note>) => {
       if (Array.isArray(state.data?.notes)) {
         state.data = {
+          ...state.data,
           notes: [action.payload, ...state.data.notes],
-          pageNumber: state.data.pageNumber,
-          total: state.data.total,
+          total: state.data.total + 1,
+        };
+      } else {
+        state.data = {
+          notes: [action.payload],
+          pageNumber: 1,
+          total: 1,
         };
       }
     },
@@ -84,11 +88,18 @@ const slice = createSlice({
       })
       .addCase(fetchNotesByCategory.fulfilled, (state, action) => {
         state.status = "succeeded";
-        state.data = action.payload;
+        if (state.data && state.data.notes) {
+          const fetchedNoteIds = new Set(action?.payload?.notes.map(note => note.id));
+          const existingNotes = state.data.notes.filter(note => !fetchedNoteIds.has(note.id));
+          state.data.notes = [...existingNotes, ...(action?.payload?.notes ?? [])];
+          state.data.total = action?.payload?.total ?? 0;
+        } else {
+          state.data = action.payload;
+        }
       })
       .addCase(fetchNotesByCategory.rejected, (state, action) => {
         state.status = "failed";
-        state.error = action.error.message ? action.error.message : "";
+        state.error = action.payload ? action.error.message : "";
       });
   },
 });

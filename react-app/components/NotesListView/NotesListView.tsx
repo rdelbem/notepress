@@ -23,20 +23,21 @@ export const NotesListView = () => {
   const { term } = useParams();
   const dispatch = useDispatch<AppDispatch>();
   const [progress, setProgress] = useState(0);
-  const {
-    data,
-    error,
-    status,
-  } = useSelector((state: RootState) => state.notes);
+  const { data, error, status } = useSelector(
+    (state: RootState) => state.notes
+  );
 
   useEffect(() => {
     setProgress(30);
     if (term) {
-      dispatch(fetchNotesByCategory({category: term, pageNumber: 0}));
+      dispatch(fetchNotesByCategory({ category: term, pageNumber: 0 })).finally(
+        () => setProgress(100)
+      );
     } else {
-      dispatch(fetchNotesByCategory({category: 'all', pageNumber: 0}));
+      dispatch(
+        fetchNotesByCategory({ category: "all", pageNumber: 0 })
+      ).finally(() => setProgress(100));
     }
-    setProgress(100);
   }, [term, dispatch]);
 
   const handleRemoveNote = (noteId: number) => {
@@ -45,14 +46,28 @@ export const NotesListView = () => {
     }
   };
 
-  const handlePageClick = ({selected}: {selected: number}) => {
-    // WordPress starts its pagination count at 1 😔
-    if(term) {
-      dispatch(fetchNotesByCategory({category: term, pageNumber: selected += 1}));
-    }else{
-      dispatch(fetchNotesByCategory({category: 'all', pageNumber: selected += 1}));
+  const handlePageClick = ({ selected }: { selected: number }) => {
+    if (term) {
+      dispatch(
+        fetchNotesByCategory({ category: term, pageNumber: selected + 1 })
+      );
+    } else {
+      dispatch(
+        fetchNotesByCategory({ category: "all", pageNumber: selected + 1 })
+      );
     }
   };
+
+  const filteredNotes =
+    data?.notes?.filter((note: Note) => {
+      if (term && note.workspaces) {
+        const noteWorkspaces = note.workspaces
+          .split(",")
+          .map((ws) => ws.split(":")[0].trim()); // Extract workspace names
+        return noteWorkspaces.includes(term);
+      }
+      return true;
+    }) || [];
 
   return (
     <>
@@ -62,29 +77,12 @@ export const NotesListView = () => {
         onLoaderFinished={() => setProgress(0)}
       />
       <Container>
-        {data?.notes && Array.isArray(data.notes) && data.notes.length > 0 && (
-          data.notes.map((note: Note) => {
-            const noteWorkspaces: string | string[] | undefined =
-              note.workspaces.split(",")
-                ? note.workspaces.split(",")
-                : note.workspaces === ""
-                ? note.workspaces
-                : undefined;
-            if (Array.isArray(noteWorkspaces) && term) {
-              return noteWorkspaces.includes(term) ? (
-                <NoteCard
-                  {...note}
-                  key={note.id}
-                  removeNote={handleRemoveNote}
-                />
-              ) : (
-                <p>No notes found for this workspace.</p>
-              );
-            }
-            return (
-              <NoteCard {...note} key={note.id} removeNote={handleRemoveNote} />
-            );
-          })
+        {filteredNotes.length > 0 ? (
+          filteredNotes.map((note: Note) => (
+            <NoteCard {...note} key={note.id} removeNote={handleRemoveNote} />
+          ))
+        ) : (
+          <p>No notes found for this workspace.</p>
         )}
       </Container>
       {data?.total && data.total > 9 ? (
@@ -94,7 +92,7 @@ export const NotesListView = () => {
           previousLabel="<"
           onPageChange={handlePageClick}
           pageRangeDisplayed={4}
-          pageCount={Math.ceil(data?.total / 9)}
+          pageCount={Math.ceil(data.total / 9)}
           renderOnZeroPageCount={null}
         />
       ) : null}

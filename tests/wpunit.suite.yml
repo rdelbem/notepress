@@ -5,13 +5,13 @@ modules:
   config:
     WPLoader:
       wpRootFolder: '/wordpress'
-      wpConfigFile: '/wordpress/wp-config.php'
-      dbName: 'wp_test'
+      wpConfigFile: '/wp-config.php'
+      dbName: 'wp_test_test'
       dbHost: 'db' # Matches the service name in docker-compose.yml
       dbUser: 'root'
       dbPassword: 'root'
       tablePrefix: 'wp_'
-      domain: 'http://localhost:8080'
+      domain: 'http://localhost:8088'
       adminEmail: 'admin@local.test'
       title: 'Test Site'
 extensions:

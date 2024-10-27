@@ -14,6 +14,8 @@ final class Activation
         self::updatePermalinkStructure();
         self::registerOwnerUser();
         self::generateEnvHashKey();
+
+        (new Auth())->createSession(wp_get_current_user());
     }
 
     protected static function createBasePageRoute()
@@ -21,12 +23,12 @@ final class Activation
         $pageTitle = 'Base Page Route';
         $pageSlug = 'notepress';
 
-        $args = array(
+        $args = [
             'post_type' => 'page',
             'post_status' => 'any',
             'title' => $pageTitle,
             'numberposts' => 1
-        );
+        ];
 
         $query = new \WP_Query($args);
 

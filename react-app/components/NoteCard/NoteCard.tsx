@@ -4,8 +4,6 @@ import styled from "styled-components";
 import { theme } from "../../colors";
 import { format as fromatDate } from "date-fns";
 import { Link, useParams } from "react-router-dom";
-import Markdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import { IoTrashBin } from "react-icons/io5";
 import { api } from "../../utils/fetch";
 import { PopUp } from "../PopUp/PopUp";
@@ -99,15 +97,15 @@ export const NoteCard = ({
       <CardContainer>
         <TitleAndIconsContainer>
           <Title>
-            <p>{`${!term ? workspaces + " /" : ""}${title}`}</p>
+            <p>{`${!term ? workspaces.split(":")[0] + " /" : ""}${title}`}</p>
           </Title>
-          <StyledButton onClick={() => setShowModal(true)}>
+          <StyledButton aria-label="delete note" onClick={() => setShowModal(true)}>
             <IoTrashBin />
           </StyledButton>
         </TitleAndIconsContainer>
         <StyledLink to={`/notepress/editor/${id}`}>
           <Content>
-            <Markdown remarkPlugins={[remarkGfm]}>{content}</Markdown>
+            {content}
           </Content>
         </StyledLink>
         <DateContainer>

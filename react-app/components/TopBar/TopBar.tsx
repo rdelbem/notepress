@@ -7,11 +7,12 @@ import { PopUp } from "../PopUp";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { CreateNoteInput, Note } from "../../types";
+import { CreateNoteInput, Note, Workspace } from "../../types";
 import { useDispatch, useSelector } from "react-redux";
 import { addNote } from "../../slices/notes";
 import { RootState } from "../../store";
 import LoadingBar from "react-top-loading-bar";
+import { addWorkspace } from "../../slices/workspaces";
 
 const AddNoteButton = styled.button`
   background: ${theme.pallete.magenta};
@@ -97,20 +98,57 @@ export const TopBar = () => {
     },
   });
 
-  const onSubmit = async (inputUpdate: Omit<CreateNoteInput, 'workspaces'> & { workspaces?: string }) => {
+  // const onSubmit = async (inputUpdate: Omit<CreateNoteInput, 'workspaces'> & { workspaces?: string }) => {
+  //   setShowModal(false);
+  //   reset();
+  //   try {
+  //     setProgress(30);
+  //     const updatedInput = {
+  //       ...inputUpdate,
+  //       workspaces: inputUpdate.workspaces ? inputUpdate.workspaces : term || 'default',
+  //     };
+  //     const response = await api.create<Note>("notes", updatedInput);
+  //     if (response.data) {
+  //       dispatch(addNote(response.data));
+  //     }
+  //   } catch (error) {
+  //     console.error("Error:", error);
+  //   } finally {
+  //     setProgress(100);
+  //   }
+  // };
+
+  const onSubmit = async (
+    inputUpdate: Omit<CreateNoteInput, "workspaces"> & { workspaces?: string }
+  ) => {
     setShowModal(false);
     reset();
     try {
-      setProgress(30)
+      setProgress(30);
       const response = await api.create<Note>("notes", inputUpdate);
       if (response.data) {
         dispatch(addNote(response.data));
+  
+        // Handle workspaces
+        if (response.data.workspaces) {
+          const workspaceStrings = response.data.workspaces.split(",");
+          workspaceStrings.forEach((workspaceString) => {
+            const [name, idString] = workspaceString.split(":");
+            const id = +idString;
+            if (name && !isNaN(id)) {
+              const newWorkspace: Workspace = {
+                id,
+                name,
+              };
+              dispatch(addWorkspace(newWorkspace));
+            }
+          });
+        }
       }
     } catch (error) {
-      setProgress(100)
       console.error("Error:", error);
-    }finally {
-      setProgress(100)
+    } finally {
+      setProgress(100);
     }
   };
 

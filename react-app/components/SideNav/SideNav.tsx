@@ -37,55 +37,66 @@ export const SideNav = () => {
   const { data, status, error } = useSelector(
     (state: RootState) => state.workspaces
   );
-  
+
   useEffect(() => {
-    dispatch(fetchWorkspaceData(0));
-  }, [dispatch]);
+    if (status === "idle") {
+      dispatch(fetchWorkspaceData(0));
+    }
+  }, [dispatch, status]);
 
   const loading = status === "loading";
   const failed = status === "failed";
+  const shouldError =
+    error instanceof Error || typeof error === "string" ? true : false;
 
-  const handlePageClick = ({selected}: {selected: number}) => {
+  const handlePageClick = ({ selected }: { selected: number }) => {
     // WordPress starts its pagination count at 1 😔
-    dispatch(fetchWorkspaceData(selected += 1));
+    dispatch(fetchWorkspaceData(selected + 1));
   };
+
+  if (failed || shouldError) {
+    return (
+      <StyledMenuContainer>
+        <p>Unable to get workspaces.</p>
+      </StyledMenuContainer>
+    );
+  }
 
   return (
     <>
-      {!loading && !failed && (
+      {!loading && (
         <StyledMenuContainer>
-          {error instanceof Error || error ? (
-            <p>Unable to get workspaces.</p>
-          ) : (
-            <ul>
-              <Link to={"/notepress/"}>
-                <StyledLi onClick={() => dispatch(setCurrentTerm(undefined))}>All notes</StyledLi>
-              </Link>
-              {data?.workspaces &&
-                data.workspaces.length > 0 &&
-                data.workspaces.map((workspace) => (
-                  <Link
-                    to={`/notepress/workspace/${workspace.name}`}
-                    key={workspace.id}
-                  >
-                    <li onClick={() => dispatch(setCurrentTerm(workspace.name))}>{workspace.name}</li>
-                  </Link>
-                ))}
-            </ul>
-          )}
+          <ul>
+            <Link to={"/notepress/"}>
+              <StyledLi onClick={() => dispatch(setCurrentTerm(undefined))}>
+                All notes
+              </StyledLi>
+            </Link>
+            {data?.workspaces &&
+              data.workspaces.map((workspace) => (
+                <Link
+                  to={`/notepress/workspace/${workspace.name}`}
+                  key={workspace.id}
+                >
+                  <li onClick={() => dispatch(setCurrentTerm(workspace.name))}>
+                    {workspace.name}
+                  </li>
+                </Link>
+              ))}
+          </ul>
         </StyledMenuContainer>
       )}
-      {data?.total && data.total > 10 && (
+      {data?.total && data.total > 10 ? (
         <ReactPaginate
           breakLabel="..."
           nextLabel=">"
           previousLabel="<"
           onPageChange={handlePageClick}
           pageRangeDisplayed={4}
-          pageCount={Math.ceil(data?.total / 10)}
+          pageCount={Math.ceil(data.total / 10)}
           renderOnZeroPageCount={null}
         />
-      )}
+      ) : null}
     </>
   );
 };

@@ -45,7 +45,7 @@ module.exports = (env) => {
             new webpack.HotModuleReplacementPlugin(),
             new CleanWebpackPlugin(),
             new BrowserSyncPlugin({
-                proxy: "localhost:8080",
+                proxy: "localhost:8088",
                 port: 3000,
                 files: ["**/*.php", "**/*.ts",  "**/*.tsx", "**/*.js"],
                 ghostMode: {
