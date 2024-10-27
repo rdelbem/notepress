@@ -184,7 +184,14 @@ Contributions are welcome! Please follow these steps:
 
 7.  **Create a Pull Request**: Open a pull request to the main repository's `develop` branch.
 
-License
--------
+### 1. Stable plugin generation
+- **Stable Version Generation**: This repository features a generate-plugin.sh file. When running it, a stable plugin zip file will be generated.
 
-This project is licensed under the MIT License. See the <LICENSE> file for details.
+### 2. WordPress code reviewers
+Please note that this repo serves as the development version of what we intend to offer to WordPress users. The end-users receive a stable, compiled version without any development-related files or folders. **Given this, it's advisable to review both this development repository, which includes human-readable JS, and the stable version.**
+
+## License
+
+This WordPress plugin is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the [GNU General Public License](http://www.gnu.org/licenses/gpl-2.0.html) for more details.

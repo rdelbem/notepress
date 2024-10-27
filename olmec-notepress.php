@@ -6,7 +6,7 @@
  * Version: 1.0.0
  * Author: Olmec, Rodrigo Vieira Del Bem
  * Author URI: http://delbem.net/portfolio
- * License: GPL-2.0+
+ * License: GPLv2 or later
  * Text Domain: olmec-notepress-domain
  * Domain Path: languages
  */
