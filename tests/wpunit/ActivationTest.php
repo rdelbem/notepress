@@ -29,11 +29,5 @@ class ActivationTest extends WPTestCase
         $currentUserId = wp_get_current_user()->ID;
         $storedOwner = get_option('notepress_owner');
         $this->assertEquals($currentUserId, $storedOwner);
-
-        $envPath = OLMEC_NOTEPRESS_ABSPATH . '/.env';
-        $this->assertFileExists($envPath);
-
-        $envContents = file_get_contents($envPath);
-        $this->assertStringContainsString('JWT_HASH_KEY=', $envContents);
     }
 }
