@@ -2,6 +2,8 @@
 
 namespace Olmec\OlmecNotepress;
 
+use Dotenv\Dotenv;
+
 if (!defined('ABSPATH')) {
     exit;
 }
@@ -13,9 +15,6 @@ final class Activation
         self::createBasePageRoute();
         self::updatePermalinkStructure();
         self::registerOwnerUser();
-        self::generateEnvHashKey();
-
-        (new Auth())->createSession(wp_get_current_user());
     }
 
     protected static function createBasePageRoute()
@@ -66,14 +65,5 @@ final class Activation
     {
         update_option('notepress_owner', (wp_get_current_user())->ID);
         update_option('notepress_owner_id', uniqid() . '#' . (wp_get_current_user())->ID);
-    }
-
-    protected static function generateEnvHashKey() {
-        $path = OLMEC_NOTEPRESS_ABSPATH . '/.env';
-        if (!file_exists($path)) {
-            $hashKey = bin2hex(random_bytes(256));
-            $envKey = "JWT_HASH_KEY={$hashKey}\n";
-            file_put_contents($path, $envKey, LOCK_EX);
-        }
     }
 }

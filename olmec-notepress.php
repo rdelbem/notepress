@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Plugin Name: Notepress OLMC
  * Plugin URI: http://delbem.net/portfolio/notepress
@@ -16,23 +17,40 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+if (!file_exists(plugin_dir_path(__FILE__) . '/.env')) {
+    $path = plugin_dir_path(__FILE__) . '/.env';
+    $hashKey = bin2hex(random_bytes(256));
+    $envKey = "JWT_HASH_KEY={$hashKey}\n";
+
+    try {
+        file_put_contents($path, $envKey, LOCK_EX);
+        error_log('.env successfully created with JWT_HASH_KEY.');
+    } catch (\Exception $e) {
+        error_log('Error creating .env file: ' . $e->getMessage());
+    }
+}
+
 // loads composer autoload
 require_once __DIR__ . '/vendor/autoload.php';
 
-require_once __DIR__ . '/src/routes.php';
-require_once __DIR__ . '/src/defines.php';
-require_once __DIR__ . '/src/notepressPostypeAndTaxonomyDefinition.php';
-require_once __DIR__ . '/src/Util/functions.php';
-
 use Olmec\OlmecNotepress\Activation;
+use Olmec\OlmecNotepress\Auth;
 use Olmec\OlmecNotepress\CoreLoader;
 use Olmec\OlmecNotepress\WPCLI\NotepressCLI;
 use Olmec\OlmecNotepress\PostTypeAndTaxonomy;
 use function Olmec\OlmecNotepress\Util\registerUserLogin;
 
-register_activation_hook(__FILE__, fn() => Activation::run());
+register_activation_hook(__FILE__, function () {
+    Activation::run();
+    (new Auth())->createSession(wp_get_current_user());
+});
 
 if (!class_exists('CoreLoader')) {
+    require_once __DIR__ . '/src/routes.php';
+    require_once __DIR__ . '/src/defines.php';
+    require_once __DIR__ . '/src/notepressPostypeAndTaxonomyDefinition.php';
+    require_once __DIR__ . '/src/Util/functions.php';
+
     add_action('plugins_loaded', fn() => new CoreLoader());
     // create posttype and taxonomy
     new PostTypeAndTaxonomy(OLMEC_NOTEPRESS_POSTTYPE, OLMEC_NOTEPRESS_TAXONOMY);
