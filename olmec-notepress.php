@@ -55,7 +55,7 @@ if (!class_exists('CoreLoader')) {
     // create posttype and taxonomy
     new PostTypeAndTaxonomy(OLMEC_NOTEPRESS_POSTTYPE, OLMEC_NOTEPRESS_TAXONOMY);
     // adds Notepress CLI commands
-    (new NotepressCLI())->createCommands();
+    if (class_exists('NotepressCLI')) (new NotepressCLI())->createCommands();
     // register the time a user logged in for the last time
     // due to the nature of the "wp_login" hook, this cannot be called elsewhere
     registerUserLogin();
