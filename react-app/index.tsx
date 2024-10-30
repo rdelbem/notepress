@@ -9,6 +9,12 @@ import { SessionProvider } from "./components/SessionProvider/SessionProvider";
 
 export * from "./colors";
 
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/wp-content/plugins/olmec-notepress/service-worker.js');
+  });
+}
+
 const GlobalStyle = createGlobalStyle`
   body {
     margin: 0;

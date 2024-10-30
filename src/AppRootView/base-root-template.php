@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace Olmec\OlmecNotepress\AppRootView;
 
@@ -16,23 +16,28 @@ $userAvatarUrl = get_avatar_url($userObject->ID) !== 0 ? get_avatar_url($userObj
 
 <!DOCTYPE html>
 <html <?php language_attributes() ?> style="margin: 0px">
+
 <head>
-    <meta charset="<?php bloginfo('charset') ?>">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Notepress</title>
-    <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,700&display=swap" rel="stylesheet">
-    <?php wp_head() ?>
+  <meta charset="<?php bloginfo('charset') ?>">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Notepress</title>
+  <link rel="manifest" href="<?php echo WP_PLUGIN_URL ?>/olmec-notepress/src/AppRootView/manifest.json">
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,700&display=swap" rel="stylesheet">
+  <?php wp_head() ?>
 </head>
+
 <body <?php body_class() ?>>
 
-<div id="root"></div>
+  <div id="root"></div>
 
-<script>
-    window.nonce = "<?php echo esc_js(wp_create_nonce('wp_rest')); ?>";
-    window.api_url = "<?php echo esc_url(OLMEC_NOTEPRESS_API_URL); ?>";
-    window.user = <?php echo wp_json_encode(new User((int) $userObject->data->ID, $userObject->data->display_name ?? $userObject->data->first_name ?? 'Unknown user name', esc_url($userAvatarUrl))); ?>;
-</script>
+  <script>
+  window.nonce = "<?php echo esc_js(wp_create_nonce('wp_rest')); ?>";
+  window.api_url = "<?php echo esc_url(OLMEC_NOTEPRESS_API_URL); ?>";
+  window.user =
+    <?php echo wp_json_encode(new User((int) $userObject->data->ID, $userObject->data->display_name ?? $userObject->data->first_name ?? 'Unknown user name', esc_url($userAvatarUrl))); ?>;
+  </script>
 
-<?php wp_footer() ?>
+  <?php wp_footer() ?>
 </body>
+
 </html>

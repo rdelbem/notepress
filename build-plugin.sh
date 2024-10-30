@@ -27,6 +27,7 @@ echo "Copying files to build directory..."
 rsync -av . "$BUILD_DIR" --exclude "node_modules" \
   --exclude ".git" \
   --exclude ".github" \
+  --exclude ".nvmrc" \
   --exclude "__mocks__" \
   --exclude "react-app" \
   --exclude "wordpress" \
