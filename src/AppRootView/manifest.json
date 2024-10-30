@@ -1,0 +1,21 @@
+{
+  "name": "notepress",
+  "short_name": "notepress",
+  "start_url": "/notepress",
+  "display": "standalone",
+  "background_color": "#303030",
+  "theme_color": "#303030",
+  "description": "Just a WordPress plugin that will take control over your WP instance, and transform it into a note taking PWA app",
+  "icons": [
+    {
+      "src": "icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

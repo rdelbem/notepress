@@ -22,7 +22,7 @@ if (!defined('ABSPATH')) {
  * @param integer $limit
  * @return $string
  */
-function excerptFromText($string, $limit = 120)
+function excerptFromText(string $string, $limit = 120)
 {
     if (strlen($string) <= $limit)
         return $string;
@@ -101,8 +101,9 @@ function getNoteWorkspaces(\WP_Post $post): array
  *
  * @return void
  */
-function registerUserLogin(): void {
-    add_action('wp_login', function(string $userLogin, \WP_User $user): void {
+function registerUserLogin(): void
+{
+    add_action('wp_login', function (string $userLogin, \WP_User $user): void {
         update_option("{$user->ID}_logged_at", current_time('timestamp'));
     }, 10, 2);
 }
@@ -112,7 +113,8 @@ function registerUserLogin(): void {
  * @param mixed $msg
  * @return void
  */
-function logToServerConsole(mixed $msg){
+function logToServerConsole(mixed $msg)
+{
     if (gettype($msg) !== 'string') {
         error_log("LOG FROM NOTEPRESS START >>>>>>");
         error_log(serialize($msg));

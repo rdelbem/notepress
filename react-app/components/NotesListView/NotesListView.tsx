@@ -63,7 +63,7 @@ export const NotesListView = () => {
       if (term && note.workspaces) {
         const noteWorkspaces = note.workspaces
           .split(",")
-          .map((ws) => ws.split(":")[0].trim()); // Extract workspace names
+          .map((ws) => ws.split(":")[0]?.trim()); // Extract workspace names
         return noteWorkspaces.includes(term);
       }
       return true;
