@@ -1,5 +1,5 @@
 === Notepress OLMC ===
-Contributors: rdelbem
+Contributors: Rodrigo Vieira Del Bem <rodrigodelbem@gmail.com>
 Tags: notes, productivity
 Requires at least: 5.6
 Tested up to: 6.6.2
